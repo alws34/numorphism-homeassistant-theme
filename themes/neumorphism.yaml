@@ -128,6 +128,31 @@ Neumorphism:
   ha-badge-size: 44px
   ha-badge-border-radius: 22px
 
+  # ha-control-* family: thermostat card, modern more-info controls, and tile
+  # card features. Defaults paint a translucent grey wash; give them solid
+  # recessed troughs and the accent for the active fill instead.
+  control-button-background-color: var(--soft-surface)
+  control-button-background-opacity: "1"
+  control-button-border-radius: var(--soft-control-radius)
+  control-button-icon-color: var(--primary-text-color)
+  control-button-focus-color: var(--primary-color)
+  control-number-buttons-background-color: var(--soft-surface)
+  control-number-buttons-background-opacity: "1"
+  control-number-buttons-border-radius: var(--soft-control-radius)
+  control-number-buttons-focus-color: var(--primary-color)
+  control-slider-color: var(--primary-color)
+  control-slider-background: var(--soft-recess)
+  control-slider-background-opacity: "1"
+  control-slider-border-radius: var(--soft-control-radius)
+  control-circular-slider-color: var(--primary-color)
+  control-circular-slider-background: var(--soft-recess)
+  control-circular-slider-background-opacity: "1"
+  control-select-color: var(--primary-color)
+  control-select-background: var(--soft-recess)
+  control-select-background-opacity: "1"
+  control-select-border-radius: var(--soft-control-radius)
+  control-select-thickness: 44px
+
   # Mushroom classic cards, chips, and controls. New template cards use HA tiles.
   mush-spacing: 12px
   mush-card-primary-color: var(--primary-text-color)
@@ -242,11 +267,20 @@ Neumorphism:
       border-radius: 50%;
       box-shadow: var(--soft-shadow-small);
     }
-    mushroom-button {
+    mushroom-button,
+    ha-control-button {
       border-radius: var(--soft-control-radius);
       box-shadow: var(--soft-shadow-small);
     }
-    mushroom-button:active {
+    mushroom-button:active,
+    ha-control-button:active {
+      box-shadow: var(--soft-shadow-inset);
+    }
+    /* Thermostat card + modern more-info controls: recessed troughs. The
+       circular slider is an SVG stroke, so its solid recess colour (set via
+       the control-circular-slider-* variables above) is the achievable depth. */
+    ha-control-select, ha-control-slider, ha-control-number-buttons {
+      border-radius: var(--soft-control-radius);
       box-shadow: var(--soft-shadow-inset);
     }
     mushroom-light-brightness-control,

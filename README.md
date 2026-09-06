@@ -78,6 +78,7 @@ The supplied dashboard has 109 Bubble cards, 55 Mushroom cards, and 12 Mushroom 
 | Components in the supplied dashboard | Treatment |
 | --- | --- |
 | Native tiles, entities, gauges, clocks, weather, history, alarm panel, to-do, picture cards | Shared raised card surface, palette, state colors, rounded geometry; native control groups get recessed surfaces. |
+| Native thermostat / climate card, modern more-info controls | `ha-control-*` family themed: recessed circular-slider track and mode selector, raised stepper buttons, accent-colored active fill. The circular slider is an SVG stroke, so it gets a solid recess color rather than a true inset shadow. |
 | Mushroom entity, template, light, number, update | Raised cards/icon containers and styled exposed control surfaces. Current template cards use HA tile styling; classic cards use Mushroom variables. |
 | Mushroom chips and template badges | Individual raised pills; the chip row itself remains transparent. |
 | Bubble buttons, sliders, sub-buttons, media players, separators, pop-ups | Bubble theme variables plus scoped card-mod CSS; raised interactive surfaces, quieter separators, themed menus and opaque pop-up surfaces. |
