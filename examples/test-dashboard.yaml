@@ -1,0 +1,203 @@
+title: Lovelace Soft test
+views:
+- title: Material study
+  path: soft-test
+  type: sections
+  max_columns: 3
+  theme: Lovelace Soft
+  badges:
+  - type: entity
+    entity: input_boolean.lovelace_soft_test
+    name: Native badge
+    show_name: true
+  - type: custom:mushroom-template-badge
+    entity: input_number.lovelace_soft_level
+    icon: mdi:brightness-6
+    label: Mushroom badge
+    content: '{{ states(''input_number.lovelace_soft_level'') }}%'
+  sections:
+  - type: grid
+    cards:
+    - type: heading
+      heading: Native controls
+      icon: mdi:home-assistant
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: tile
+      entity: input_boolean.lovelace_soft_test
+      name: Test switch
+      features:
+      - type: toggle
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: tile
+      entity: input_number.lovelace_soft_level
+      name: Native slider
+      features:
+      - type: numeric-input
+        style: slider
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: entities
+      title: Form controls
+      entities:
+      - input_boolean.lovelace_soft_test
+      - input_number.lovelace_soft_level
+      - input_select.lovelace_soft_mode
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: gauge
+      entity: input_number.lovelace_soft_level
+      name: Test level
+      min: 0
+      max: 100
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: markdown
+      content: '**Lovelace Soft**
+
+
+        Raised surfaces. Recessed controls. One material.
+
+
+        In your profile, switch **Light → Dark → Auto**.
+
+        With Auto selected, change your device appearance.
+
+        '
+      grid_options:
+        columns: 12
+        rows: auto
+  - type: grid
+    cards:
+    - type: heading
+      heading: Mushroom
+      icon: mdi:mushroom-outline
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:mushroom-template-card
+      entity: input_boolean.lovelace_soft_test
+      primary: Modern template
+      secondary: '{{ states(''input_boolean.lovelace_soft_test'') | title }}'
+      icon: mdi:lightbulb-outline
+      color: '{{ ''teal'' if is_state(''input_boolean.lovelace_soft_test'', ''on'')
+        else ''grey'' }}'
+      tap_action:
+        action: toggle
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:mushroom-entity-card
+      entity: input_boolean.lovelace_soft_test
+      name: Classic entity
+      tap_action:
+        action: toggle
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:mushroom-number-card
+      entity: input_number.lovelace_soft_level
+      name: Recessed slider
+      display_mode: slider
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:mushroom-number-card
+      entity: input_number.lovelace_soft_level
+      name: Number buttons
+      display_mode: buttons
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:mushroom-chips-card
+      chips:
+      - type: entity
+        entity: input_boolean.lovelace_soft_test
+        tap_action:
+          action: toggle
+      - type: entity
+        entity: input_number.lovelace_soft_level
+      - type: action
+        icon: mdi:open-in-new
+        tap_action:
+          action: navigate
+          navigation_path: '#soft-popup'
+      grid_options:
+        columns: 12
+        rows: auto
+  - type: grid
+    cards:
+    - type: heading
+      heading: Bubble
+      icon: mdi:circle-multiple-outline
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:bubble-card
+      card_type: button
+      button_type: switch
+      entity: input_boolean.lovelace_soft_test
+      name: Bubble switch
+      show_state: true
+      sub_button:
+        main:
+        - entity: input_number.lovelace_soft_level
+          show_state: true
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:bubble-card
+      card_type: button
+      button_type: slider
+      entity: input_number.lovelace_soft_level
+      name: Bubble slider
+      show_state: true
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:bubble-card
+      card_type: select
+      entity: input_select.lovelace_soft_mode
+      name: Bubble menu
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:bubble-card
+      card_type: separator
+      name: A quieter separator
+      icon: mdi:tune
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:bubble-card
+      card_type: button
+      button_type: name
+      name: Open test pop-up
+      icon: mdi:open-in-new
+      button_action:
+        tap_action:
+          action: navigate
+          navigation_path: '#soft-popup'
+      grid_options:
+        columns: 12
+        rows: auto
+    - type: custom:bubble-card
+      card_type: pop-up
+      hash: '#soft-popup'
+      name: Same material, more depth
+      icon: mdi:layers-outline
+      cards:
+      - type: custom:mushroom-number-card
+        entity: input_number.lovelace_soft_level
+        display_mode: slider
+      - type: tile
+        entity: input_boolean.lovelace_soft_test
+      grid_options:
+        columns: 12
+        rows: auto

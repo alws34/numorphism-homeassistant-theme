@@ -1,0 +1,19 @@
+# Optional package: all controls on the sample dashboard use these helpers.
+input_boolean:
+  lovelace_soft_test:
+    name: Soft test switch
+    icon: mdi:lightbulb-outline
+input_number:
+  lovelace_soft_level:
+    name: Soft test level
+    min: 0
+    max: 100
+    step: 1
+    initial: 55
+    unit_of_measurement: "%"
+    icon: mdi:brightness-6
+input_select:
+  lovelace_soft_mode:
+    name: Soft test mode
+    options: [Home, Away, Night]
+    icon: mdi:home-outline

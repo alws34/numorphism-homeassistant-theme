@@ -1,0 +1,390 @@
+# Lovelace Soft — Home Assistant + card-mod 4.2+, Mushroom 5+, Bubble Card 3.3+.
+# Select this theme in your profile and set color mode to Auto.
+Lovelace Soft:
+  card-mod-theme: Lovelace Soft
+
+  # One material, lit from the upper left. Tune these four values for depth.
+  soft-radius: 22px
+  soft-control-radius: 14px
+  soft-shadow-raised: 6px 6px 12px var(--soft-shadow-dark), -6px -6px 12px var(--soft-shadow-light)
+  soft-shadow-small: 3px 3px 6px var(--soft-shadow-dark), -3px -3px 6px var(--soft-shadow-light)
+  soft-shadow-inset: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light)
+
+  # Home Assistant surfaces, including the current semantic color system.
+  primary-background-color: var(--soft-surface)
+  secondary-background-color: var(--soft-surface)
+  card-background-color: var(--soft-surface)
+  clear-background-color: var(--soft-surface)
+  lovelace-background: var(--soft-surface)
+  ha-card-background: var(--soft-surface)
+  ha-card-box-shadow: var(--soft-shadow-raised)
+  ha-card-border-radius: var(--soft-radius)
+  ha-card-border-width: 1px
+  ha-card-border-color: var(--soft-edge)
+  ha-card-header-color: var(--primary-text-color)
+  ha-card-header-font-size: 20px
+  ha-color-surface-default: var(--soft-surface)
+  ha-color-surface-low: var(--soft-surface)
+  ha-color-surface-lower: var(--soft-recess)
+  ha-color-on-surface-default: var(--primary-text-color)
+  ha-color-text-primary: var(--primary-text-color)
+  ha-color-text-secondary: var(--secondary-text-color)
+  ha-color-text-disabled: var(--disabled-text-color)
+  ha-color-text-link: var(--primary-color)
+  ha-color-focus: var(--primary-color)
+  ha-color-border-neutral-quiet: var(--divider-color)
+  ha-color-border-neutral-normal: var(--soft-control-edge)
+  ha-color-border-neutral-loud: var(--secondary-text-color)
+  ha-color-fill-neutral-quiet-resting: var(--soft-surface)
+  ha-color-fill-neutral-quiet-hover: var(--soft-recess)
+  ha-color-fill-neutral-quiet-active: var(--soft-recess)
+  ha-color-fill-neutral-normal-resting: var(--soft-recess)
+  ha-color-fill-neutral-normal-hover: var(--soft-recess)
+  ha-color-fill-neutral-normal-active: var(--soft-recess)
+  ha-color-on-neutral-quiet: var(--secondary-text-color)
+  ha-color-on-neutral-normal: var(--primary-text-color)
+  ha-color-form-background: var(--soft-recess)
+  ha-color-form-background-hover: var(--soft-recess)
+  ha-color-form-background-disabled: var(--soft-surface)
+  ha-color-fill-primary-quiet-resting: var(--soft-active-surface)
+  ha-color-fill-primary-quiet-hover: var(--soft-active-surface)
+  ha-color-fill-primary-quiet-active: var(--soft-active-surface)
+  ha-color-fill-primary-normal-resting: var(--soft-active-surface)
+  ha-color-fill-primary-normal-hover: var(--soft-active-surface)
+  ha-color-fill-primary-normal-active: var(--soft-active-surface)
+  ha-color-fill-primary-loud-resting: var(--primary-color)
+  ha-color-fill-primary-loud-hover: var(--primary-color)
+  ha-color-fill-primary-loud-active: var(--primary-color)
+  ha-color-on-primary-quiet: var(--primary-color)
+  ha-color-on-primary-normal: var(--primary-color)
+  ha-color-on-primary-loud: var(--text-primary-color)
+  ha-color-border-primary-loud: var(--primary-color)
+  ha-section-grid-row-gap: 20px
+  ha-section-grid-column-gap: 20px
+  horizontal-stack-card-margin: 0 8px
+  vertical-stack-card-margin: 10px 0
+
+  # App chrome and dialogs use the same material as dashboard cards.
+  app-header-background-color: var(--soft-surface)
+  app-header-text-color: var(--primary-text-color)
+  app-header-selection-bar-color: var(--primary-color)
+  sidebar-background-color: var(--soft-surface)
+  sidebar-text-color: var(--primary-text-color)
+  sidebar-icon-color: var(--secondary-text-color)
+  sidebar-selected-background-color: var(--soft-active-surface)
+  sidebar-selected-text-color: var(--primary-color)
+  sidebar-selected-icon-color: var(--primary-color)
+  ha-dialog-surface-background: var(--soft-surface)
+  ha-dialog-border-radius: 28px
+  ha-dialog-surface-backdrop-filter: none
+  mdc-dialog-scrim-color: var(--soft-scrim)
+  paper-listbox-background-color: var(--soft-surface)
+  paper-item-icon-color: var(--secondary-text-color)
+  paper-item-icon-active-color: var(--primary-color)
+  state-icon-color: var(--secondary-text-color)
+  state-icon-active-color: var(--primary-color)
+  state-active-color: var(--primary-color)
+  state-inactive-color: var(--secondary-text-color)
+  state-unavailable-color: var(--disabled-text-color)
+  # Keep domain-specific safety/HVAC colors from Home Assistant.
+  state-switch-active-color: var(--primary-color)
+  state-input_boolean-active-color: var(--primary-color)
+  state-light-active-color: var(--warning-color)
+  state-lock-locked-color: var(--success-color)
+  state-lock-unlocked-color: var(--error-color)
+
+  # Form controls: current HA variables plus legacy custom-card fallbacks.
+  input-fill-color: var(--soft-recess)
+  input-disabled-fill-color: var(--soft-surface)
+  input-ink-color: var(--primary-text-color)
+  input-label-ink-color: var(--secondary-text-color)
+  input-dropdown-icon-color: var(--secondary-text-color)
+  input-idle-line-color: var(--soft-control-edge)
+  input-hover-line-color: var(--primary-color)
+  input-outlined-idle-border-color: var(--soft-control-edge)
+  input-outlined-hover-border-color: var(--primary-color)
+  ha-switch-background-color: var(--soft-recess)
+  ha-switch-border-color: var(--soft-control-edge)
+  ha-switch-thumb-background-color: var(--secondary-text-color)
+  ha-switch-thumb-box-shadow: var(--soft-shadow-small)
+  ha-switch-checked-background-color: var(--primary-color)
+  ha-switch-checked-border-color: var(--primary-color)
+  ha-switch-checked-thumb-background-color: var(--text-primary-color)
+  ha-switch-min-touch-size: 44px
+  switch-checked-button-color: var(--text-primary-color)
+  switch-checked-track-color: var(--primary-color)
+  switch-unchecked-button-color: var(--secondary-text-color)
+  switch-unchecked-track-color: var(--soft-recess)
+  slider-color: var(--primary-color)
+  slider-track-color: var(--soft-recess)
+  ha-slider-track-color: var(--soft-recess)
+  ha-slider-thumb-color: var(--primary-color)
+  ha-slider-track-size: 8px
+  ha-tile-icon-border-radius: 50%
+  ha-assist-chip-container-shape: 22px
+  ha-assist-chip-container-color: var(--soft-surface)
+  ha-assist-chip-filled-container-color: var(--soft-surface)
+  ha-assist-chip-active-container-color: var(--soft-active-surface)
+  ha-badge-size: 44px
+  ha-badge-border-radius: 22px
+
+  # Mushroom classic cards, chips, and controls. New template cards use HA tiles.
+  mush-spacing: 12px
+  mush-card-primary-color: var(--primary-text-color)
+  mush-card-secondary-color: var(--secondary-text-color)
+  mush-card-primary-font-size: 14px
+  mush-card-secondary-font-size: 12px
+  mush-icon-border-radius: 50%
+  mush-control-border-radius: var(--soft-control-radius)
+  mush-control-height: 44px
+  mush-chip-height: 44px
+  mush-chip-spacing: 12px
+  mush-chip-border-radius: 22px
+  mush-chip-background: var(--soft-surface)
+  mush-chip-border-width: 1px
+  mush-chip-border-color: var(--soft-edge)
+  mush-chip-box-shadow: var(--soft-shadow-small)
+  mush-rgb-state-entity: var(--rgb-primary-color)
+  mush-rgb-state-number: var(--rgb-primary-color)
+  mush-rgb-state-light: var(--rgb-warning-color)
+  mush-rgb-disabled: var(--rgb-secondary-text-color)
+
+  # Bubble's public variables cover its full card family and portalled menus.
+  bubble-main-background-color: var(--soft-surface)
+  bubble-secondary-background-color: var(--soft-surface)
+  bubble-accent-color: var(--primary-color)
+  bubble-button-accent-color: var(--soft-active-surface)
+  bubble-border-radius: 24px
+  bubble-border: 1px solid var(--soft-edge)
+  bubble-box-shadow: var(--soft-shadow-small)
+  bubble-icon-background-color: var(--soft-surface)
+  bubble-icon-border-radius: 50%
+  bubble-sub-button-background-color: var(--soft-surface)
+  bubble-sub-button-border-radius: 16px
+  bubble-main-buttons-background-color: var(--soft-surface)
+  bubble-media-player-button-background-color: var(--soft-surface)
+  bubble-media-player-slider-background-color: var(--soft-recess)
+  bubble-media-player-play-pause-icon-color: var(--text-primary-color)
+  bubble-cover-button-background-color: var(--soft-surface)
+  bubble-climate-button-background-color: var(--soft-surface)
+  bubble-select-list-background-color: var(--soft-surface)
+  bubble-select-list-border-radius: 18px
+  bubble-select-list-item-accent-color: var(--soft-active-surface)
+  bubble-pop-up-main-background-color: var(--soft-surface)
+  bubble-pop-up-border-radius: 28px
+  bubble-pop-up-border: 1px solid var(--soft-edge)
+  bubble-backdrop-background-color: var(--soft-scrim)
+  bubble-line-background-color: var(--divider-color)
+  bubble-horizontal-buttons-stack-background-color: var(--soft-surface)
+
+  # Public component surfaces work on a fresh HA session. Avoid card-mod's
+  # *-yaml loader: card-mod 4.2.1 cannot bootstrap it on HA 2026.9.
+  card-mod-card: |
+    ha-card {
+      transition: background-color 160ms ease, box-shadow 160ms ease;
+    }
+    :is(button,[role="button"],a,input,select,textarea):focus-visible {
+      outline: 2px solid var(--primary-color) !important;
+      outline-offset: -2px;
+    }
+    /* Momentary feedback only: :active releases with the pointer/key.
+       Do not use the cards' .active class, which means the entity is on. */
+    :is(button, [role="button"], a[href], ha-button, ha-icon-button,
+        ha-control-button, mushroom-button, ha-tile-icon):not(:disabled):not([disabled]):not([aria-disabled="true"]):active,
+    ha-button:not([disabled]):active::part(base),
+    ha-card.action:active,
+    ha-card:has(ha-tile-container:active),
+    ha-card:has(mushroom-state-item:active),
+    ha-card:is(.type-action, .type-entity, .type-template, .type-light,
+        .type-menu, .type-back, .type-quickbar):active {
+      box-shadow: var(--soft-shadow-inset) !important;
+      transition: none !important;
+    }
+    ha-card:has(mushroom-state-item:active) mushroom-shape-icon {
+      box-shadow: var(--soft-shadow-inset);
+    }
+    /* Bubble paints its own surface; leave separator/wrapper cards flat. */
+    .bubble-icon-container, .bubble-sub-button:not(.background-off),
+    .bubble-button:not(.bubble-wrapper), .bubble-media-button, .bubble-climate-button {
+      box-shadow: var(--soft-shadow-small);
+    }
+    .bubble-container:has(.bubble-action-enabled:active),
+    .bubble-icon-container:active, .bubble-button:active,
+    .bubble-sub-button:active, .bubble-media-button:active,
+    .bubble-climate-button:active, .bubble-close-button:active,
+    .bubble-container:has(.bubble-background:active) {
+      box-shadow: var(--soft-shadow-inset) !important;
+      transition: none !important;
+    }
+    .bubble-range-slider, .bubble-sub-button-slider {
+      box-shadow: var(--soft-shadow-inset);
+    }
+    .bubble-pop-up-background {
+      background-color: var(--soft-surface) !important;
+    }
+    .bubble-pop-up.is-popup-opened {
+      box-shadow: var(--soft-shadow-raised);
+    }
+    .bubble-state { opacity: 1; }
+    .bubble-sub-button { --bubble-accent-color: var(--soft-active-surface); }
+    /* Do not suppress scrolling/visibility logic in Bubble's pop-ups. */
+    @media (prefers-reduced-motion: reduce) {
+      ha-card, .bubble-wrapper, .bubble-background, .bubble-icon-container {
+        transition: none !important;
+      }
+      .scrolling-container span { animation: none !important; }
+    }
+
+    /* Style public custom-element surfaces without a YAML shadow-DOM loader.
+       ponytail: internal canvas/iframe pixels keep their own design; add an
+       upstream theme hook if a particular card needs deeper customization. */
+    mushroom-shape-icon, ha-tile-icon {
+      border-radius: 50%;
+      box-shadow: var(--soft-shadow-small);
+    }
+    mushroom-button {
+      border-radius: var(--soft-control-radius);
+      box-shadow: var(--soft-shadow-small);
+    }
+    mushroom-button:active {
+      box-shadow: var(--soft-shadow-inset);
+    }
+    mushroom-light-brightness-control,
+    mushroom-light-color-temp-control,
+    mushroom-light-color-control,
+    mushroom-number-value-control,
+    mushroom-cover-position-control,
+    mushroom-cover-tilt-position-control,
+    mushroom-fan-percentage-control,
+    mushroom-climate-temperature-control,
+    mushroom-media-player-volume-control,
+    mushroom-humidifier-humidity-control,
+    hui-card-features {
+      border-radius: var(--soft-control-radius);
+      box-shadow: var(--soft-shadow-inset);
+    }
+    ha-slider::part(track), ha-switch::part(control) {
+      box-shadow: var(--soft-shadow-inset);
+    }
+    ha-textfield, ha-select {
+      border-radius: var(--soft-control-radius);
+      box-shadow: var(--soft-shadow-inset);
+    }
+    .bubble-separator { box-shadow: none; border: none; }
+    /* State-dependent text/icon colors are supplied by the cards themselves. */
+    @media (prefers-reduced-motion: reduce) {
+      mushroom-shape-icon, mushroom-button, ha-tile-icon {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+
+  # Reuse the same native-button rules in rows, view headers, and app chrome.
+  card-mod-row: &soft-button-surfaces |
+    :is(button, [role="button"], a[href], ha-button, ha-icon-button,
+        ha-control-button):not(:disabled):not([disabled]):not([aria-disabled="true"]):active,
+    ha-button:not([disabled]):active::part(base) {
+      box-shadow: var(--soft-shadow-inset) !important;
+      transition: none !important;
+    }
+    ha-slider::part(track), ha-switch::part(control) {
+      box-shadow: var(--soft-shadow-inset);
+    }
+    ha-textfield, ha-select {
+      border-radius: var(--soft-control-radius);
+      box-shadow: var(--soft-shadow-inset);
+    }
+  card-mod-root: *soft-button-surfaces
+  card-mod-view: *soft-button-surfaces
+
+  card-mod-badge: |
+    :host { --ha-card-box-shadow: var(--soft-shadow-small); }
+    .badge[role="button"]:active {
+      box-shadow: var(--soft-shadow-inset) !important;
+      transition: none !important;
+    }
+    .badge:focus-visible { outline: 2px solid var(--primary-color) !important; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { .badge { transition: none !important; } }
+
+  card-mod-assist-chip: |
+    :host { box-shadow: var(--soft-shadow-small); border-radius: 22px; }
+    :host(:not([disabled]):active) { box-shadow: var(--soft-shadow-inset) !important; transition: none !important; }
+
+  card-mod-dialog: |
+    wa-dialog::part(dialog), .mdc-dialog__surface {
+      background: var(--soft-surface);
+      box-shadow: var(--soft-shadow-raised);
+    }
+  card-mod-more-info: |
+    wa-dialog::part(dialog), .mdc-dialog__surface {
+      background: var(--soft-surface);
+      box-shadow: var(--soft-shadow-raised);
+    }
+
+  modes:
+    light:
+      soft-surface: "#e8edf2"
+      soft-recess: "#dde4eb"
+      soft-active-surface: "#d3e8eb"
+      soft-shadow-dark: "#c4ced8"
+      soft-shadow-light: "#ffffff"
+      soft-edge: "#f5f8fb"
+      soft-control-edge: "#788695"
+      soft-scrim: "rgba(27, 39, 51, 0.38)"
+      primary-color: "#006d77"
+      accent-color: "#006d77"
+      primary-text-color: "#243446"
+      secondary-text-color: "#526173"
+      text-primary-color: "#ffffff"
+      disabled-text-color: "#788695"
+      disabled-color: "#788695"
+      divider-color: "#c2ccd6"
+      outline-color: "#788695"
+      outline-hover-color: "#526173"
+      error-color: "#b53243"
+      warning-color: "#8c5700"
+      success-color: "#216f45"
+      info-color: "#1768a1"
+      rgb-primary-color: "0, 109, 119"
+      rgb-accent-color: "0, 109, 119"
+      rgb-primary-text-color: "36, 52, 70"
+      rgb-secondary-text-color: "82, 97, 115"
+      rgb-text-primary-color: "255, 255, 255"
+      rgb-card-background-color: "232, 237, 242"
+      rgb-error-color: "181, 50, 67"
+      rgb-warning-color: "140, 87, 0"
+      rgb-success-color: "33, 111, 69"
+      rgb-info-color: "23, 104, 161"
+    dark:
+      soft-surface: "#252d38"
+      soft-recess: "#202731"
+      soft-active-surface: "#29464b"
+      soft-shadow-dark: "#171d25"
+      soft-shadow-light: "#354150"
+      soft-edge: "#354150"
+      soft-control-edge: "#8191a5"
+      soft-scrim: "rgba(8, 12, 18, 0.66)"
+      primary-color: "#70d6cf"
+      accent-color: "#70d6cf"
+      primary-text-color: "#edf3fa"
+      secondary-text-color: "#b4c1d1"
+      text-primary-color: "#102e32"
+      disabled-text-color: "#8191a5"
+      disabled-color: "#8191a5"
+      divider-color: "#465467"
+      outline-color: "#8191a5"
+      outline-hover-color: "#b4c1d1"
+      error-color: "#ff95a1"
+      warning-color: "#f2c572"
+      success-color: "#82d6a7"
+      info-color: "#8ecbff"
+      rgb-primary-color: "112, 214, 207"
+      rgb-accent-color: "112, 214, 207"
+      rgb-primary-text-color: "237, 243, 250"
+      rgb-secondary-text-color: "180, 193, 209"
+      rgb-text-primary-color: "16, 46, 50"
+      rgb-card-background-color: "37, 45, 56"
+      rgb-error-color: "255, 149, 161"
+      rgb-warning-color: "242, 197, 114"
+      rgb-success-color: "130, 214, 167"
+      rgb-info-color: "142, 203, 255"

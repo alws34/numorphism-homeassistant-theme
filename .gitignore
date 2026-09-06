@@ -1,0 +1,7 @@
+# Keep personal dashboard exports out of a public HACS theme repository.
+/lovelace*.yaml
+/lovelace*.yaml.bak
+.DS_Store
+__pycache__/
+.venv/
+/lovelace-soft-hacs.zip
