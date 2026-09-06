@@ -4,4 +4,5 @@
 .DS_Store
 __pycache__/
 .venv/
-/lovelace-soft-hacs.zip
+/*.zip
+docs/superpowers/

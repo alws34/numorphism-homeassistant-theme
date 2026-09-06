@@ -44,6 +44,23 @@ Mushroom light controls and Bubble media-player controls use verified upstream h
 
 ## Press-feedback follow-up
 
-Added CSS press states for exposed card actions, badges, chips, and buttons, plus `frontend/lovelace-soft-press.js` for native buttons inside nested open shadow roots. The module changes only shadow/transition styles during a press and restores the previous inline values and priorities on release or cancellation. It does not cancel events or invoke Home Assistant actions.
+`frontend/neumorphism-press.js` provides momentary press feedback across open
+shadow roots, where theme CSS cannot reach (native `ha-badge`, Mushroom template
+badges, and other nested clickable elements). On `pointerdown` it walks
+`event.composedPath()` and selects the innermost real button, or failing that the
+innermost element the frontend renders as clickable — computed `cursor: pointer`
+and not an inline element. Home Assistant, Mushroom, and Bubble all set
+`cursor: pointer` on actionable surfaces (entity rows, tiles, badges, chips, card
+tap targets) and never on inert ones, so this covers default cards too. It
+changes only `box-shadow`/`transition` during the press and restores the previous
+inline values and priorities on release, cancellation, or window blur. It does
+not cancel events or invoke Home Assistant actions.
 
-`node tests/check_press.mjs` passes for pointer release/cancel, lost capture, keyboard press/release, window blur, disabled controls, theme opt-in, and exact restoration. The local frontend bootstrap imports the module. A real Mushroom plus-button click changed the helper from 55 to 56 across card families, and the button had no residual inline style afterward. The held-down intermediate frame was not captured by the browser automation; verify the visible press/release effect with the README checklist.
+`node tests/check_press.mjs` passes for explicit buttons and generic pointer
+surfaces, inline-link exclusion, keyboard scope, pointer release/cancel, lost
+capture, window blur, disabled controls, theme opt-in, and exact restoration. The
+theme also keeps its `:active` CSS press states as a no-JS fallback for the
+common exposed hosts. The held-down intermediate frame is not reliably captured
+by browser automation; verify the visible press/release effect with the README
+checklist, including a native badge and a Mushroom template badge that have a
+`tap_action`.

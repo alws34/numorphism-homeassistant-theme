@@ -1,10 +1,10 @@
-title: Lovelace Soft test
+title: Neumorphism test
 views:
 - title: Material study
   path: soft-test
   type: sections
   max_columns: 3
-  theme: Lovelace Soft
+  theme: Neumorphism
   badges:
   - type: entity
     entity: input_boolean.lovelace_soft_test
@@ -59,7 +59,7 @@ views:
         columns: 12
         rows: auto
     - type: markdown
-      content: '**Lovelace Soft**
+      content: '**Neumorphism**
 
 
         Raised surfaces. Recessed controls. One material.

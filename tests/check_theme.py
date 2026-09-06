@@ -62,13 +62,13 @@ def check_styles(value):
 files = list((ROOT / "themes").glob("*.yaml"))
 assert len(files) == 1, "HACS must manage one theme file"
 themes = load(files[0].read_text())
-assert list(themes) == ["Lovelace Soft"]
-theme = themes["Lovelace Soft"]
-assert theme["card-mod-theme"] == "Lovelace Soft"
+assert list(themes) == ["Neumorphism"]
+theme = themes["Neumorphism"]
+assert theme["card-mod-theme"] == "Neumorphism"
 assert not any(key.endswith("-yaml") for key in theme), "Avoid the broken card-mod 4.2.1 YAML bootstrap"
 assert set(theme["modes"]) == {"light", "dark"}
 assert set(theme["modes"]["light"]) == set(theme["modes"]["dark"])
-assert json.loads((ROOT / "hacs.json").read_text())["name"] == "Lovelace Soft"
+assert json.loads((ROOT / "hacs.json").read_text())["name"] == "Neumorphism"
 
 for mode, palette in theme["modes"].items():
     merged = {k: v for k, v in theme.items() if k != "modes"} | palette
@@ -107,7 +107,7 @@ if original.exists() and copy.exists():
     before, after = load(original.read_text()), load(copy.read_text())
     assert len(before["views"]) == len(after["views"])
     for old, new in zip(before["views"], after["views"]):
-        assert new["theme"] == "Lovelace Soft"
+        assert new["theme"] == "Neumorphism"
         assert new["background"] == "var(--lovelace-background)"
         old.pop("background", None)
         old.pop("theme", None)

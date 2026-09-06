@@ -1,4 +1,4 @@
-# Lovelace Soft
+# Neumorphism
 
 A neumorphic Home Assistant theme: pale ceramic in light mode, slate in dark mode, with raised cards and icons, recessed control surfaces, and teal accents. One theme contains both palettes and follows Home Assistant's **Auto / Light / Dark** preference.
 
@@ -7,7 +7,7 @@ Runtime: one YAML theme plus **card-mod**, with a small press-feedback module fo
 ## Install and try it now
 
 1. In HACS, install/update **card-mod**, **Mushroom**, and **Bubble Card**. Tested versions: Home Assistant **2026.9.1**, frontend **20260826.6**, card-mod **4.2.1**, Mushroom **5.2.3**, Bubble Card **3.3.0**.
-2. Copy [`themes/lovelace-soft.yaml`](themes/lovelace-soft.yaml) to `/config/themes/lovelace-soft.yaml` on Home Assistant. Copy [`frontend/lovelace-soft-press.js`](frontend/lovelace-soft-press.js) to `/config/www/lovelace-soft-press.js` (create `www` if needed).
+2. Copy [`themes/neumorphism.yaml`](themes/neumorphism.yaml) to `/config/themes/neumorphism.yaml` on Home Assistant. Copy [`frontend/neumorphism-press.js`](frontend/neumorphism-press.js) to `/config/www/neumorphism-press.js` (create `www` if needed).
 3. Merge this into your existing `/config/configuration.yaml`; keep a single `frontend:` section:
 
    ```yaml
@@ -15,13 +15,13 @@ Runtime: one YAML theme plus **card-mod**, with a small press-feedback module fo
      themes: !include_dir_merge_named themes
      extra_module_url:
        - /hacsfiles/lovelace-card-mod/card-mod.js
-       - /local/lovelace-soft-press.js?v=1
+       - /local/neumorphism-press.js?v=2
    ```
 
    **Use your actual card-mod resource URL.** Find it under **Settings → Dashboards → ⋮ → Resources**. If its URL has a `?hacstag=...` suffix, copy that exact URL into `extra_module_url` too. Retain the HACS-managed resource entry and keep both URLs identical after updates. See [card-mod installation](https://github.com/thomasloven/lovelace-card-mod#installation).
 
 4. Check your HA configuration, then restart Home Assistant once for the `frontend` change. For subsequent theme-only edits, run **Developer tools → Actions → `frontend.reload_themes`**, then refresh the browser if necessary.
-5. Open your **Profile → General → Theme**, select **Lovelace Soft**, then set **Theme mode → Auto**. Home Assistant selects the light or dark palette from the device appearance. These are native [frontend theme modes](https://www.home-assistant.io/integrations/frontend/#dark-mode-support).
+5. Open your **Profile → General → Theme**, select **Neumorphism**, then set **Theme mode → Auto**. Home Assistant selects the light or dark palette from the device appearance. These are native [frontend theme modes](https://www.home-assistant.io/integrations/frontend/#dark-mode-support).
 
 ## Test without controlling real devices
 
@@ -36,7 +36,7 @@ The supplied sample uses only three test helpers.
    ```
 
    If packages are already configured differently, use your existing package layout. Do not add a second package loader. See [Home Assistant packages](https://www.home-assistant.io/docs/configuration/packages/).
-3. Create a new empty dashboard called **Lovelace Soft test**. Open its **Edit dashboard → ⋮ → Raw configuration editor** and paste [`examples/test-dashboard.yaml`](examples/test-dashboard.yaml). This example assumes Mushroom and Bubble Card resources are loaded.
+3. Create a new empty dashboard called **Neumorphism test**. Open its **Edit dashboard → ⋮ → Raw configuration editor** and paste [`examples/test-dashboard.yaml`](examples/test-dashboard.yaml). This example assumes Mushroom and Bubble Card resources are loaded.
 4. Run this checklist:
 
    | Check | Expected result |
@@ -50,7 +50,7 @@ The supplied sample uses only three test helpers.
    | Open test pop-up | Its background matches the theme; nested controls work; Escape/back closes it. |
    | Entity more-info | Dialog remains readable and close controls work. |
    | Keyboard | Tab focus stays visible; existing keyboard controls continue working. |
-   | Press feedback | Hold a clickable button, chip, badge, or card action: its surface becomes inset and returns on release. Test Mushroom plus/minus, native buttons, and Bubble actions. Space/Enter work on keyboard-enabled buttons; disabled controls stay unchanged. |
+   | Press feedback | Hold any clickable element — entity row, tile, badge (native and Mushroom template), chip, Mushroom plus/minus, native button, Bubble action, or a card with a tap action: its surface goes inset and returns on release. Space/Enter work on keyboard-focusable buttons; disabled and non-clickable elements stay unchanged. |
    | Phone / tablet / desktop | Check approximately 375px, 768px, and 1440px widths; no new horizontal scrolling or clipped controls. |
    | Reduced motion | Theme-added transitions stop; upstream cards retain their own motion behavior. |
 
@@ -61,7 +61,7 @@ After testing, remove the test dashboard and the helper package if no longer nee
 The accompanying local `lovelace.neumorphic.yaml` is a copy of the supplied `lovelace.yaml`. Only the two view-level settings changed:
 
 ```yaml
-theme: Lovelace Soft
+theme: Neumorphism
 background: var(--lovelace-background)
 ```
 
@@ -86,26 +86,28 @@ The supplied dashboard has 109 Bubble cards, 55 Mushroom cards, and 12 Mushroom 
 | Grid, sections, horizontal/vertical stacks, auto-entities, decluttering, config-template, restriction, simple-swipe, conditional | Structural wrappers stay transparent; their child cards inherit the theme. |
 | Iframes, remote logos, photos, video | Surrounding surface is themed; embedded pages and image/video pixels cannot be recolored by an HA theme. |
 
+**Press feedback is not limited to that list.** With `neumorphism-press.js` loaded, the inset press effect applies to any element the frontend renders as clickable (computed `cursor: pointer`) — default entity rows, tiles, native and Mushroom badges, chips, Bubble actions, and cards with a `tap_action` — regardless of card type. Inline text links and non-clickable elements are left alone.
+
 **A YAML theme cannot guarantee every internal element of every third-party card.** Hard-coded inline styles, closed shadow roots, canvases, and cross-origin iframes are outside the common theme interface. This package styles the exposed surfaces and preserves state/action semantics. The specialized cards above still need a visual pass on your installation with their real data.
 
 ## HACS distribution
 
 This folder has the required structure for a **Theme** repository: one file under `themes/`, a root `hacs.json`, and this README. See [HACS theme requirements](https://www.hacs.xyz/docs/publish/theme/).
 
-To distribute it, create a public GitHub repository from the package files, add a description and the `home-assistant`, `hacs`, `theme`, and `neumorphism` topics. In HACS, open **⋮ → Custom repositories**, paste that repository URL, choose **Theme**, then download **Lovelace Soft**. [HACS custom repositories](https://www.hacs.xyz/docs/faq/custom_repositories/).
+To distribute it, create a public GitHub repository from the package files, add a description and the `home-assistant`, `hacs`, `theme`, and `neumorphism` topics. In HACS, open **⋮ → Custom repositories**, paste that repository URL, choose **Theme**, then download **Neumorphism**. [HACS custom repositories](https://www.hacs.xyz/docs/faq/custom_repositories/).
 
-The package has not been published to GitHub or added to the HACS default store. HACS installs the theme; install card-mod separately and copy the press-feedback module using step 2. HACS's Theme category does not install or update frontend JavaScript. When updating that module, replace the file and increment its `?v=1` suffix, then restart/refresh. Personal dashboard exports are intentionally excluded by `.gitignore` and from the distribution ZIP.
+The package has not been published to GitHub or added to the HACS default store. HACS installs the theme; install card-mod separately and copy the press-feedback module using step 2. HACS's Theme category does not install or update frontend JavaScript. When updating that module, replace the file and increment its `?v=` suffix, then restart/refresh. Personal dashboard exports are intentionally excluded by `.gitignore` and from the distribution ZIP.
 
 ## Tuning and troubleshooting
 
 - **Too much depth:** reduce the offsets/blur in `soft-shadow-raised` and `soft-shadow-small` near the top of the theme. Keep upper-left highlights and lower-right shadows in both modes.
 - **Wrong canvas:** clear the view's wallpaper override or use `background: var(--lovelace-background)`.
 - **Raised cards but flat icons/controls:** verify card-mod is loaded through the exact `extra_module_url`, then refresh. The base theme works without card-mod, but its extra surface styling does not.
-- **A nested button does not press inward:** verify `/local/lovelace-soft-press.js?v=1` loads. The module follows the event path through open shadow roots and temporarily changes the actual button's shadow. It restores existing inline styles on release, cancellation, or window blur and leaves actions unchanged. Closed shadow roots and cross-origin embedded pages remain outside its reach.
+- **A clickable element does not press inward:** verify `/local/neumorphism-press.js?v=2` loads. The module follows the event path through open shadow roots and briefly changes the shadow of the innermost element the frontend renders as clickable (computed `cursor: pointer`), which covers default entity rows, tiles, badges, chips, and any card tap target. It restores existing inline styles on release, cancellation, or window blur and leaves actions unchanged. Closed shadow roots and cross-origin embedded pages remain outside its reach.
 - **Only one card differs:** inspect its local `styles`, `card_mod`, background, and Bubble module settings. Explicit card overrides can take precedence over the theme.
 - **Mode does not follow your device:** choose **Auto**, remove a per-card mode override, and check the companion app's appearance setting. `frontend.set_theme` selects a default theme for a mode; it does not force every user's current light/dark preference.
 - **Pop-up colors briefly lag:** update Bubble Card and refresh the browser. Existing JavaScript-generated RGB/state colors remain the card's responsibility.
-- **Keep the exact theme name:** `Lovelace Soft` and `card-mod-theme: Lovelace Soft` must match.
+- **Keep the exact theme name:** `Neumorphism` and `card-mod-theme: Neumorphism` must match.
 - **Rollback:** select your previous profile theme and return to the original dashboard. You can then remove this theme file and reload themes.
   The press module is inactive when the selected theme does not expose `soft-shadow-inset`; remove its frontend entry/file too if uninstalling.
 

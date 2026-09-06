@@ -1,7 +1,7 @@
-# Lovelace Soft — Home Assistant + card-mod 4.2+, Mushroom 5+, Bubble Card 3.3+.
+# Neumorphism — Home Assistant + card-mod 4.2+, Mushroom 5+, Bubble Card 3.3+.
 # Select this theme in your profile and set color mode to Auto.
-Lovelace Soft:
-  card-mod-theme: Lovelace Soft
+Neumorphism:
+  card-mod-theme: Neumorphism
 
   # One material, lit from the upper left. Tune these four values for depth.
   soft-radius: 22px
