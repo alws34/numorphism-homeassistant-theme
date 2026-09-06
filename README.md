@@ -15,7 +15,7 @@ Runtime: one YAML theme plus **card-mod**, with a small press-feedback module fo
      themes: !include_dir_merge_named themes
      extra_module_url:
        - /hacsfiles/lovelace-card-mod/card-mod.js
-       - /local/neumorphism-press.js?v=2
+       - /local/neumorphism-press.js?v=3
    ```
 
    **Use your actual card-mod resource URL.** Find it under **Settings → Dashboards → ⋮ → Resources**. If its URL has a `?hacstag=...` suffix, copy that exact URL into `extra_module_url` too. Retain the HACS-managed resource entry and keep both URLs identical after updates. See [card-mod installation](https://github.com/thomasloven/lovelace-card-mod#installation).
@@ -104,7 +104,7 @@ The package has not been published to GitHub or added to the HACS default store.
 - **Too much depth:** reduce the offsets/blur in `soft-shadow-raised` and `soft-shadow-small` near the top of the theme. Keep upper-left highlights and lower-right shadows in both modes.
 - **Wrong canvas:** clear the view's wallpaper override or use `background: var(--lovelace-background)`.
 - **Raised cards but flat icons/controls:** verify card-mod is loaded through the exact `extra_module_url`, then refresh. The base theme works without card-mod, but its extra surface styling does not.
-- **A clickable element does not press inward:** verify `/local/neumorphism-press.js?v=2` loads. The module follows the event path through open shadow roots and briefly changes the shadow of the innermost element the frontend renders as clickable (computed `cursor: pointer`), which covers default entity rows, tiles, badges, chips, and any card tap target. It restores existing inline styles on release, cancellation, or window blur and leaves actions unchanged. Closed shadow roots and cross-origin embedded pages remain outside its reach.
+- **A clickable element does not press inward:** verify `/local/neumorphism-press.js?v=3` loads. The module follows the event path through open shadow roots and briefly changes the shadow of the innermost element the frontend renders as clickable (computed `cursor: pointer`), which covers default entity rows, tiles, badges, chips, and any card tap target. It restores existing inline styles on release, cancellation, or window blur and leaves actions unchanged. Closed shadow roots and cross-origin embedded pages remain outside its reach.
 - **Only one card differs:** inspect its local `styles`, `card_mod`, background, and Bubble module settings. Explicit card overrides can take precedence over the theme.
 - **Mode does not follow your device:** choose **Auto**, remove a per-card mode override, and check the companion app's appearance setting. `frontend.set_theme` selects a default theme for a mode; it does not force every user's current light/dark preference.
 - **Pop-up colors briefly lag:** update Bubble Card and refresh the browser. Existing JavaScript-generated RGB/state colors remain the card's responsibility.

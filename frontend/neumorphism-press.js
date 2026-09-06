@@ -83,4 +83,9 @@
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) releasePressedSurface();
   });
+
+  // Load marker for support: `window.__neumorphismPress` is true iff this file
+  // actually loaded. If it is undefined, the extra_module_url entry is missing
+  // or wrong and no clickable element will show the press effect.
+  window.__neumorphismPress = true;
 })();
