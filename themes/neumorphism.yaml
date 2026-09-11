@@ -304,7 +304,7 @@ Neumorphism:
       border-radius: var(--soft-control-radius);
       box-shadow: var(--soft-shadow-inset);
     }
-    .bubble-separator { box-shadow: none; border: none; }
+    .bubble-separator { box-shadow: none; border: none; background: none !important; }
     /* State-dependent text/icon colors are supplied by the cards themselves. */
     @media (prefers-reduced-motion: reduce) {
       mushroom-shape-icon, mushroom-button, ha-tile-icon {
