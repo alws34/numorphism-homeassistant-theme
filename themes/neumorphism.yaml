@@ -201,6 +201,13 @@ Neumorphism:
   bubble-backdrop-background-color: var(--soft-scrim)
   bubble-line-background-color: var(--divider-color)
   bubble-horizontal-buttons-stack-background-color: var(--soft-surface)
+  # Bubble's shared .bubble-container rule (bubble-box-shadow / bubble-main-
+  # background-color above) applies to every card type, separators included;
+  # the separator's own stylesheet only zeroes its border, not the shadow or
+  # fill, so it otherwise keeps the raised-pill look. These card-type-scoped
+  # variables (bubble-card's own naming convention) opt separators out.
+  bubble-separator-box-shadow: none
+  bubble-separator-main-background-color: transparent
 
   # Public component surfaces work on a fresh HA session. Avoid card-mod's
   # *-yaml loader: card-mod 4.2.1 cannot bootstrap it on HA 2026.9.
@@ -304,7 +311,6 @@ Neumorphism:
       border-radius: var(--soft-control-radius);
       box-shadow: var(--soft-shadow-inset);
     }
-    .bubble-separator { box-shadow: none; border: none; background: none !important; }
     /* State-dependent text/icon colors are supplied by the cards themselves. */
     @media (prefers-reduced-motion: reduce) {
       mushroom-shape-icon, mushroom-button, ha-tile-icon {
