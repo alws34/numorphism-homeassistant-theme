@@ -3,15 +3,18 @@
 Neumorphism:
   card-mod-theme: Neumorphism
 
-  # One material, lit straight-on: shadow and highlight both sit centered
-  # (0 0 offset) with a spread radius pushing the dark tone out past the
-  # light one, so depth reads as an even raised halo on every edge instead
-  # of a corner light source. Tune these four values for depth.
+  # One material, lit from directly overhead rather than one corner: the
+  # original dark/light pair (bottom-right dark, top-left light) is mirrored
+  # onto the other diagonal (bottom-left dark, top-right light) at the same
+  # offset/blur, so both dark corners join into one dark bottom edge and both
+  # light corners join into one light top edge — full pop on every side
+  # instead of concentrated in the top-left corner. Tune these four values
+  # for depth.
   soft-radius: 22px
   soft-control-radius: 14px
-  soft-shadow-raised: 0 0 20px 3px var(--soft-shadow-dark), 0 0 8px 1px var(--soft-shadow-light)
-  soft-shadow-small: 0 0 10px 2px var(--soft-shadow-dark), 0 0 5px 1px var(--soft-shadow-light)
-  soft-shadow-inset: inset 0 0 8px 1px var(--soft-shadow-dark), inset 0 0 4px 1px var(--soft-shadow-light)
+  soft-shadow-raised: 6px 6px 12px var(--soft-shadow-dark), -6px 6px 12px var(--soft-shadow-dark), -6px -6px 12px var(--soft-shadow-light), 6px -6px 12px var(--soft-shadow-light)
+  soft-shadow-small: 3px 3px 6px var(--soft-shadow-dark), -3px 3px 6px var(--soft-shadow-dark), -3px -3px 6px var(--soft-shadow-light), 3px -3px 6px var(--soft-shadow-light)
+  soft-shadow-inset: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light), inset 3px -3px 6px var(--soft-shadow-light)
 
   # Home Assistant surfaces, including the current semantic color system.
   primary-background-color: var(--soft-surface)
