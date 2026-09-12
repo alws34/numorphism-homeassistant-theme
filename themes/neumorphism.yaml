@@ -3,12 +3,14 @@
 Neumorphism:
   card-mod-theme: Neumorphism
 
-  # One material, lit from the upper left. Tune these four values for depth.
+  # One material, lit straight-on: shadow and highlight both sit centered
+  # (0 0 offset) so depth reads as an even halo on every edge instead of a
+  # corner light source. Tune these four values for depth.
   soft-radius: 22px
   soft-control-radius: 14px
-  soft-shadow-raised: 6px 6px 12px var(--soft-shadow-dark), -6px -6px 12px var(--soft-shadow-light)
-  soft-shadow-small: 3px 3px 6px var(--soft-shadow-dark), -3px -3px 6px var(--soft-shadow-light)
-  soft-shadow-inset: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light)
+  soft-shadow-raised: 0 0 12px var(--soft-shadow-dark), 0 0 6px var(--soft-shadow-light)
+  soft-shadow-small: 0 0 6px var(--soft-shadow-dark), 0 0 3px var(--soft-shadow-light)
+  soft-shadow-inset: inset 0 0 6px var(--soft-shadow-dark), inset 0 0 3px var(--soft-shadow-light)
 
   # Home Assistant surfaces, including the current semantic color system.
   primary-background-color: var(--soft-surface)
