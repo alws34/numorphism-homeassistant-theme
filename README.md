@@ -15,7 +15,7 @@ Runtime: one YAML theme plus **card-mod**, with a small press-feedback module fo
      themes: !include_dir_merge_named themes
      extra_module_url:
        - /hacsfiles/lovelace-card-mod/card-mod.js
-       - /local/neumorphism-press.js?v=4
+       - /local/neumorphism-press.js?v=5
    ```
 
    **Use your actual card-mod resource URL.** Find it under **Settings → Dashboards → ⋮ → Resources**. If its URL has a `?hacstag=...` suffix, copy that exact URL into `extra_module_url` too. Retain the HACS-managed resource entry and keep both URLs identical after updates. See [card-mod installation](https://github.com/thomasloven/lovelace-card-mod#installation).
@@ -45,7 +45,7 @@ The supplied sample uses only three test helpers.
    | Auto, then change device appearance | Palette follows the device without choosing another theme or running an automation. |
    | Test switch / Modern template / Bubble switch | The helper toggles; the on/off label and state color update. |
    | Native, Mushroom, and Bubble sliders | Moving one updates the same percentage everywhere. Try 0%, 50%, and 100%. |
-   | Mushroom number buttons | Minus/plus update the helper; controls remain legible at both limits. |
+   | Mushroom number buttons | The minus/plus pill and its round buttons are raised. Holding plus rocks it like a switch: the plus side sinks and tilts away, the minus side lifts (and vice versa). Values update; controls remain legible at both limits. |
    | Bubble menu | Menu opens above other cards; Home/Away/Night can be selected. |
    | Open test pop-up | Its background matches the theme; nested controls work; Escape/back closes it. |
    | Entity more-info | Dialog remains readable and close controls work. |
@@ -78,16 +78,18 @@ The supplied dashboard has 109 Bubble cards, 55 Mushroom cards, and 12 Mushroom 
 | Components in the supplied dashboard | Treatment |
 | --- | --- |
 | Native tiles, entities, gauges, clocks, weather, history, alarm panel, to-do, picture cards | Shared raised card surface, palette, state colors, rounded geometry; native control groups get recessed surfaces. |
-| Native thermostat / climate card, modern more-info controls | `ha-control-*` family themed: recessed circular-slider track and mode selector, raised stepper buttons, accent-colored active fill. The circular slider is an SVG stroke, so it gets a solid recess color rather than a true inset shadow. |
-| Mushroom entity, template, light, number, update | Raised cards/icon containers and styled exposed control surfaces. Current template cards use HA tile styling; classic cards use Mushroom variables. |
+| Native thermostat / climate card, modern more-info controls | `ha-control-*` family themed: recessed circular-slider track and mode selector, raised stepper buttons, a raised ± number bar with round raised buttons, accent-colored active fill. The circular slider is an SVG stroke, so it gets a solid recess color rather than a true inset shadow. |
+| Mushroom entity, template, light, number, update | Raised cards/icon containers and styled exposed control surfaces. Current template cards use HA tile styling; classic cards use Mushroom variables. Number (buttons mode) and climate ± controls are a raised pill with round raised buttons that rocks toward the pressed side like a switch; the number slider mode stays recessed. |
 | Mushroom chips and template badges | Individual raised pills; the chip row itself remains transparent. |
-| Bubble buttons, sliders, sub-buttons, media players, separators, pop-ups | Bubble theme variables plus scoped card-mod CSS; raised interactive surfaces, quieter separators, themed menus and opaque pop-up surfaces. |
+| Bubble buttons, sliders, sub-buttons, media players, separators, pop-ups | Bubble theme variables plus scoped card-mod CSS; raised interactive surfaces (round raised media buttons), quieter separators, themed menus and opaque pop-up surfaces. Pressing a Bubble button sinks its visible pill; the accent-filled play button presses in with a neutral shade instead of a grey smudge. |
 | Button-card, mini-graph, ApexCharts, uptime, calendar-card-pro | Inherited card shell and palette where the card uses HA theme variables; existing data/series colors and custom content remain. |
 | Scheduler, custom to-do, Bambu Lab cards, Dreame map, UniFi map, WebRTC, more-info-card | Theme-aware outer surfaces. Their private controls, canvas drawings, maps, video overlays, and data colors require individual card support. |
 | Grid, sections, horizontal/vertical stacks, auto-entities, decluttering, config-template, restriction, simple-swipe, conditional | Structural wrappers stay transparent; their child cards inherit the theme. |
 | Iframes, remote logos, photos, video | Surrounding surface is themed; embedded pages and image/video pixels cannot be recolored by an HA theme. |
 
-**Press feedback is not limited to that list.** With `neumorphism-press.js` loaded, the inset press effect applies to any element the frontend renders as clickable (computed `cursor: pointer`) — default entity rows, tiles, native and Mushroom badges, chips, Bubble actions, and cards with a `tap_action` — regardless of card type. Inline text links and non-clickable elements are left alone.
+**Press feedback is not limited to that list.** With `neumorphism-press.js` loaded, the inset press effect applies to any element the frontend renders as clickable (computed `cursor: pointer`) — default entity rows, tiles, native and Mushroom badges, chips, Bubble actions, and cards with a `tap_action` — regardless of card type, including cards wrapped in card-mod's `mod-card` (for example a Mushroom template badge used as a card). The surface that sinks is the element that paints the button, not an icon inside it. Inline text links and non-clickable elements are left alone.
+
+The ± rockers and Bubble button presses live inside component shadow roots, so they need `neumorphism-press.js`; the theme's CSS alone cannot reach them. Tune the rocker with `soft-rocker-tilt` (default `12deg`) and `soft-rocker-perspective` (default `150cqw`, relative to the control's width) at the top of the theme.
 
 **A YAML theme cannot guarantee every internal element of every third-party card.** Hard-coded inline styles, closed shadow roots, canvases, and cross-origin iframes are outside the common theme interface. This package styles the exposed surfaces and preserves state/action semantics. The specialized cards above still need a visual pass on your installation with their real data.
 
@@ -97,15 +99,17 @@ This folder has the required structure for a **Theme** repository: one file unde
 
 To distribute it, create a public GitHub repository from the package files, add a description and the `home-assistant`, `hacs`, `theme`, and `neumorphism` topics. In HACS, open **⋮ → Custom repositories**, paste that repository URL, choose **Theme**, then download **Neumorphism**. [HACS custom repositories](https://www.hacs.xyz/docs/faq/custom_repositories/).
 
-The package has not been published to GitHub or added to the HACS default store. HACS installs the theme; install card-mod separately and copy the press-feedback module using step 2. HACS's Theme category does not install or update frontend JavaScript. When updating that module, replace the file and increment its `?v=` suffix, then restart/refresh. Personal dashboard exports are intentionally excluded by `.gitignore` and from the distribution ZIP.
+The package is published at [alws34/numorphism-homeassistant-theme](https://github.com/alws34/numorphism-homeassistant-theme) as a HACS custom repository; it is not in the HACS default store. HACS installs and updates the theme YAML only; install card-mod separately and copy the press-feedback module using step 2.
+
+**Updating:** HACS's Theme category does not install or update frontend JavaScript. After a HACS update, also copy the release's `frontend/neumorphism-press.js` to `/config/www/`, increment its `?v=` suffix in `extra_module_url`, restart Home Assistant, and hard-refresh (force-close the Companion app). Personal dashboard exports are intentionally excluded by `.gitignore` and from the distribution ZIP.
 
 ## Tuning and troubleshooting
 
 - **Too much depth:** reduce the offsets/blur in `soft-shadow-raised` and `soft-shadow-small` near the top of the theme. Keep upper-left highlights and lower-right shadows in both modes.
 - **Wrong canvas:** clear the view's wallpaper override or use `background: var(--lovelace-background)`.
 - **Raised cards but flat icons/controls:** verify card-mod is loaded through the exact `extra_module_url`, then refresh. The base theme works without card-mod, but its extra surface styling does not.
-- **A clickable element does not press inward:** verify `/local/neumorphism-press.js?v=4` loads. The module follows the event path through open shadow roots and briefly changes the shadow of the innermost element the frontend renders as clickable (computed `cursor: pointer`), which covers default entity rows, tiles, badges, chips, and any card tap target. It restores existing inline styles on release, cancellation, or window blur and leaves actions unchanged. Closed shadow roots and cross-origin embedded pages remain outside its reach.
-- **Text is unreadable in dialogs on iOS (Safari or the Companion app), intermittently:** this is a Home Assistant core bug (`frontend/src/state/themes-mixin.ts`) — for any non-"default" theme resolved to light mode, HA sets `<meta name="color-scheme">` to `"dark light"` instead of `"light"`. WebKit uses that hint for native form-control colors independently of the page's CSS, so sliders/switches/inputs inside dialogs can render dark-native while the page itself is light. `neumorphism-press.js?v=4` now corrects this meta tag whenever Neumorphism is active, derived from the actually-applied text color, so it self-heals even if HA never rewrites the tag. Verify the resource URL was bumped to `?v=4` and hard-refresh the Companion app once after updating.
+- **A clickable element does not press inward:** verify the module loads. In the browser console, `window.__neumorphismPress` must print `true`; if it is `undefined`, open `/local/neumorphism-press.js?v=5` in a tab — a 404 means the file is missing from `/config/www/` (a newly created `www` folder also needs an HA restart). Badges in the view's badge row still press without it (theme CSS), but badges wrapped in `mod-card`, Bubble buttons, and the ± rockers do not. The module follows the event path through open shadow roots and briefly changes the shadow of the innermost element the frontend renders as clickable (computed `cursor: pointer`), which covers default entity rows, tiles, badges, chips, and any card tap target. It restores existing inline styles on release, cancellation, or window blur and leaves actions unchanged. Closed shadow roots and cross-origin embedded pages remain outside its reach.
+- **Text is unreadable in dialogs on iOS (Safari or the Companion app), intermittently:** this is a Home Assistant core bug (`frontend/src/state/themes-mixin.ts`) — for any non-"default" theme resolved to light mode, HA sets `<meta name="color-scheme">` to `"dark light"` instead of `"light"`. WebKit uses that hint for native form-control colors independently of the page's CSS, so sliders/switches/inputs inside dialogs can render dark-native while the page itself is light. `neumorphism-press.js?v=5` now corrects this meta tag whenever Neumorphism is active, derived from the actually-applied text color, so it self-heals even if HA never rewrites the tag. Verify the resource URL was bumped to `?v=5` and hard-refresh the Companion app once after updating.
 - **Only one card differs:** inspect its local `styles`, `card_mod`, background, and Bubble module settings. Explicit card overrides can take precedence over the theme.
 - **Mode does not follow your device:** choose **Auto**, remove a per-card mode override, and check the companion app's appearance setting. `frontend.set_theme` selects a default theme for a mode; it does not force every user's current light/dark preference.
 - **Pop-up colors briefly lag:** update Bubble Card and refresh the browser. Existing JavaScript-generated RGB/state colors remain the card's responsibility.
@@ -114,6 +118,8 @@ The package has not been published to GitHub or added to the HACS default store.
   The press module is inactive when the selected theme does not expose `soft-shadow-inset`; remove its frontend entry/file too if uninstalling.
 
 ## Validation and design references
+
+To look at the ± rockers and Bubble media buttons without Home Assistant, run `python3 -m http.server 8765` in the repo root and open `http://127.0.0.1:8765/tests/preview.html`. It loads the real theme YAML and press module into stand-in cards that copy the upstream Mushroom, HA, and Bubble markup and CSS.
 
 Run the local structural checks:
 
@@ -126,7 +132,7 @@ node tests/check_press.mjs
 
 These check duplicate YAML keys, CSS syntax, light/dark token parity, variable cycles, contrast, HACS layout, example syntax, and preservation of the personal dashboard's content. They do not claim to replace rendering tests. The light/dark text and status palette meets 4.5:1 against the main and recessed surfaces; this does not certify every third-party card's own colors or images.
 
-The JavaScript check verifies press/release, cancellation, keyboard activation, window blur, disabled controls, theme opt-in, and exact restoration of existing inline styles.
+The JavaScript check verifies press/release, the pressed-side marker and ± rocker styles, cancellation, keyboard activation, window blur, disabled controls, theme opt-in, and exact restoration of existing inline styles.
 
 Live checks used an isolated Home Assistant 2026.9.1 instance with dummy entities. See [`docs/validation.md`](docs/validation.md) for the scope and results. During testing, card-mod 4.2.1's `*-yaml` bootstrap failed on a fresh 2026.9 session. This theme uses plain `card-mod-card` CSS and public component hosts instead, avoiding that loader entirely.
 

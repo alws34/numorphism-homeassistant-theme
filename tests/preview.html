@@ -1,0 +1,421 @@
+<!doctype html>
+<!-- Visual check for the theme outside Home Assistant.
+     Run from the repo root: python3 -m http.server 8765, open /tests/preview.html.
+     Loads the real theme YAML (variables + card-mod-card CSS, injected per card
+     like card-mod does) and the real press module. The cards are stand-ins that
+     copy the upstream markup and CSS of Mushroom 5.2.3, HA frontend 20260826.6
+     and Bubble Card 3.3.0 (Bubble's CSS is fetched from its repo). -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Neumorphism preview</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--lovelace-background, #252d38);
+      color: var(--primary-text-color);
+      font-family: Roboto, system-ui, sans-serif;
+    }
+    header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; }
+    h1 { font-size: 18px; margin: 0 auto 0 0; }
+    h2 { font-size: 13px; font-weight: 500; color: var(--secondary-text-color); margin: 28px 0 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; max-width: 760px; }
+    .wide { max-width: 760px; }
+    #status { font-size: 12px; color: var(--secondary-text-color); }
+  </style>
+  <script src="../frontend/neumorphism-press.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Neumorphism preview</h1>
+    <button id="mode">Switch to light</button>
+    <span id="status">loading…</span>
+  </header>
+
+  <h2>Mushroom number card · display_mode: buttons (like Fridge / Freezer Set)</h2>
+  <div class="grid">
+    <mock-number-card name="Fridge Set" icon="mdi:thermometer" value="4" min="1" max="7" unit="°C"></mock-number-card>
+    <mock-number-card name="Freezer Set" icon="mdi:snowflake-thermometer" value="-19" min="-23" max="-15" unit="°C"></mock-number-card>
+  </div>
+
+  <h2>Mushroom number card · display_mode: slider (must stay recessed)</h2>
+  <div class="grid">
+    <mock-number-card name="Soft test level" icon="mdi:brightness-6" value="55" min="0" max="100" unit="%" mode="slider"></mock-number-card>
+  </div>
+
+  <h2>HA tile card · numeric input feature (ha-control-number-buttons)</h2>
+  <div class="grid">
+    <mock-tile-card name="Thermostat" icon="mdi:thermostat" value="21" min="7" max="30"></mock-tile-card>
+  </div>
+
+  <h2>Bubble Card media player (like Living room TV)</h2>
+  <div class="wide"><bubble-card></bubble-card></div>
+
+  <h2>Bubble Card button · button_type: state (like Pet Status)</h2>
+  <div class="wide"><bubble-button></bubble-button></div>
+
+  <h2>card-mod mod-card wrapping a Mushroom template badge (like Claude.Ai)</h2>
+  <div class="grid"><mod-card></mod-card></div>
+
+  <script type="module">
+    import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@3/+esm';
+    import yaml from 'https://cdn.jsdelivr.net/npm/js-yaml@4/+esm';
+    import * as mdi from 'https://cdn.jsdelivr.net/npm/@mdi/js@7/+esm';
+
+    const BUBBLE = 'https://cdn.jsdelivr.net/gh/Clooos/Bubble-Card@v3.3.0/src';
+    const [themeText, bubbleBase, bubbleMedia, bubbleButton] = await Promise.all([
+      fetch('../themes/neumorphism.yaml', { cache: 'no-store' }).then((r) => r.text()),
+      fetch(`${BUBBLE}/components/base-card/styles.css`).then((r) => r.text()),
+      fetch(`${BUBBLE}/cards/media-player/styles.css`).then((r) => r.text()),
+      fetch(`${BUBBLE}/cards/button/styles.css`).then((r) => r.text()),
+    ]);
+    const theme = yaml.load(themeText).Neumorphism;
+    const cardMod = new CSSStyleSheet();
+    cardMod.replaceSync(theme['card-mod-card']);
+
+    // Apply the theme the way HA does: every key becomes a custom property on <html>.
+    let mode = 'dark';
+    function applyTheme() {
+      // HA core defines its radius scale on <html>; the numeric feature uses it.
+      const vars = { 'ha-border-radius-md': '12px', ...theme, ...theme.modes[mode] };
+      for (const [key, value] of Object.entries(vars)) {
+        if (key === 'modes' || key.startsWith('card-mod')) continue;
+        document.documentElement.style.setProperty(`--${key}`, value);
+      }
+      document.getElementById('mode').textContent = `Switch to ${mode === 'dark' ? 'light' : 'dark'}`;
+    }
+    document.getElementById('mode').onclick = () => { mode = mode === 'dark' ? 'light' : 'dark'; applyTheme(); };
+    applyTheme();
+
+    const iconPath = (name = '') =>
+      mdi['mdi' + name.replace(/^mdi:/, '').replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase())] ?? '';
+
+    // --- Home Assistant stand-ins -------------------------------------------------
+    customElements.define('ha-card', class extends LitElement {
+      static styles = css`:host {
+        display: block; position: relative;
+        background: var(--ha-card-background, var(--card-background-color));
+        box-shadow: var(--ha-card-box-shadow, none);
+        border-radius: var(--ha-card-border-radius, 12px);
+        border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color));
+        color: var(--primary-text-color);
+      }`;
+      render() { return html`<slot></slot>`; }
+    });
+    const svgIcon = (path) => html`<svg viewBox="0 0 24 24"><path d=${path}></path></svg>`;
+    const iconStyles = css`:host {
+      display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+      fill: currentcolor; width: var(--mdc-icon-size, 24px); height: var(--mdc-icon-size, 24px);
+    } svg { width: 100%; height: 100%; }`;
+    customElements.define('ha-icon', class extends LitElement {
+      static properties = { icon: {} };
+      static styles = iconStyles;
+      render() { return svgIcon(iconPath(this.icon)); }
+    });
+    customElements.define('ha-svg-icon', class extends LitElement {
+      static properties = { path: {} };
+      static styles = iconStyles;
+      render() { return svgIcon(this.path); }
+    });
+    // Adds the card-mod-card sheet last, as card-mod does for every card.
+    class ThemedCard extends LitElement {
+      createRenderRoot() {
+        const root = super.createRenderRoot();
+        root.adoptedStyleSheets = [...root.adoptedStyleSheets, cardMod];
+        return root;
+      }
+    }
+    const numberProps = {
+      value: { type: Number }, min: { type: Number }, max: { type: Number },
+      step: { type: Number }, disabled: { type: Boolean },
+    };
+
+    // --- Mushroom 5.2.3 (src/shared/input-number.ts, verbatim render + styles) ---
+    customElements.define('mushroom-input-number', class extends LitElement {
+      static properties = numberProps;
+      step = 1;
+      _set(value) {
+        this.value = Math.min(this.max, Math.max(this.min, value));
+        this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value } }));
+      }
+      render() {
+        return html`
+          <div class="container" id="container">
+            <button class="button minus" @click=${() => this._set(this.value - this.step)} .disabled=${this.disabled}>
+              <ha-icon icon="mdi:minus"></ha-icon>
+            </button>
+            <span class="value">${this.value}</span>
+            <button class="button plus" @click=${() => this._set(this.value + this.step)} .disabled=${this.disabled}>
+              <ha-icon icon="mdi:plus"></ha-icon>
+            </button>
+          </div>`;
+      }
+      static styles = css`
+        :host {
+          --text-color: var(--primary-text-color);
+          --text-color-disabled: rgb(var(--rgb-disabled));
+          --icon-color: var(--primary-text-color);
+          --icon-color-disabled: rgb(var(--rgb-disabled));
+          --bg-color: rgba(var(--rgb-primary-text-color), 0.05);
+          --bg-color-disabled: rgba(var(--rgb-disabled), 0.2);
+          height: var(--control-height);
+          width: calc(var(--control-height) * var(--control-button-ratio) * 3);
+          flex: none;
+        }
+        .container {
+          box-sizing: border-box; width: 100%; height: 100%; padding: 6px;
+          display: flex; flex-direction: row; align-items: center; justify-content: center;
+          border-radius: var(--control-border-radius); border: none;
+          background-color: var(--bg-color); transition: background-color 280ms ease-in-out;
+          height: var(--control-height); overflow: hidden;
+        }
+        .button {
+          display: flex; flex-direction: row; align-items: center; justify-content: center;
+          padding: 4px; border: none; background: none; cursor: pointer;
+          border-radius: var(--control-border-radius); line-height: 0; height: 100%;
+        }
+        .minus { padding-right: 0; }
+        .plus { padding-left: 0; }
+        .button ha-icon {
+          font-size: var(--control-height); --mdc-icon-size: var(--control-icon-size);
+          color: var(--icon-color); pointer-events: none;
+        }
+        .value { text-align: center; flex-grow: 1; flex-shrink: 0; flex-basis: 20px; font-weight: bold; color: var(--text-color); }
+      `;
+    });
+
+    // Mushroom slider, reduced to its resting look (src/shared/slider.ts).
+    customElements.define('mushroom-slider', class extends LitElement {
+      static properties = numberProps;
+      render() {
+        const pct = ((this.value - this.min) / (this.max - this.min)) * 100;
+        return html`<div class="container"><div class="slider"><div class="active" style="width:${pct}%"></div></div></div>`;
+      }
+      static styles = css`
+        :host { --main-color: rgba(var(--rgb-secondary-text-color), 1); --bg-color: rgba(var(--rgb-secondary-text-color), 0.2); }
+        .container { display: flex; flex-direction: row; height: var(--control-height); }
+        .slider { position: relative; height: 100%; width: 100%; border-radius: var(--control-border-radius); overflow: hidden; background-color: var(--bg-color); }
+        .active { height: 100%; background-color: var(--main-color); }
+      `;
+    });
+
+    // src/cards/number-card/controls/number-value-control.ts
+    customElements.define('mushroom-number-value-control', class extends LitElement {
+      static properties = { ...numberProps, displayMode: {} };
+      render() {
+        const props = { value: this.value, min: this.min, max: this.max };
+        return this.displayMode === 'buttons'
+          ? html`<mushroom-input-number .value=${props.value} .min=${props.min} .max=${props.max}
+              @change=${(e) => this.dispatchEvent(new CustomEvent('value', { detail: e.detail.value }))}></mushroom-input-number>`
+          : html`<mushroom-slider .value=${props.value} .min=${props.min} .max=${props.max}></mushroom-slider>`;
+      }
+      static styles = css`
+        :host { --slider-color: rgb(var(--rgb-state-number)); --slider-bg-color: rgba(var(--rgb-state-number), 0.2); }
+        mushroom-slider { --main-color: var(--slider-color); --bg-color: var(--slider-bg-color); }
+      `;
+    });
+
+    customElements.define('mushroom-shape-icon', class extends LitElement {
+      static styles = css`:host {
+        display: flex; width: 42px; height: 42px; border-radius: 50%; align-items: center; justify-content: center;
+        background-color: rgba(var(--rgb-state-number), 0.2); color: rgb(var(--rgb-state-number)); --mdc-icon-size: 22px;
+      }`;
+      render() { return html`<slot></slot>`; }
+    });
+
+    customElements.define('mock-number-card', class extends ThemedCard {
+      static properties = { ...numberProps, name: {}, icon: {}, unit: {}, mode: {} };
+      render() {
+        return html`<ha-card><div class="container">
+          <mushroom-shape-icon><ha-icon icon=${this.icon}></ha-icon></mushroom-shape-icon>
+          <div class="primary">${this.value} ${this.unit}</div>
+          <div class="secondary">${this.name}</div>
+          <div class="actions">
+            <mushroom-number-value-control .value=${this.value} .min=${this.min} .max=${this.max}
+              .displayMode=${this.mode ?? 'buttons'} @value=${(e) => (this.value = e.detail)}></mushroom-number-value-control>
+          </div>
+        </div></ha-card>`;
+      }
+      static styles = css`
+        :host {
+          display: block;
+          --rgb-state-number: var(--mush-rgb-state-number);
+          --control-height: var(--mush-control-height, 42px);
+          --control-border-radius: var(--mush-control-border-radius, 12px);
+          --control-icon-size: 0.5em; --control-button-ratio: 1;
+        }
+        .container { display: flex; flex-direction: column; align-items: center; padding: var(--mush-spacing, 12px); gap: 4px; }
+        .primary { font-size: 14px; font-weight: bold; margin-top: 8px; }
+        .secondary { font-size: 12px; color: var(--secondary-text-color); }
+        .actions { display: flex; align-self: stretch; margin-top: 8px; }
+        mushroom-number-value-control { flex: 1; }
+      `;
+    });
+
+    // --- HA frontend 20260826.6 (src/components/ha-control-number-buttons.ts) -----
+    customElements.define('ha-control-number-buttons', class extends LitElement {
+      static properties = numberProps;
+      _set(value) { this.value = Math.min(this.max, Math.max(this.min, value)); }
+      render() {
+        return html`<div class="container">
+          <div id="input" class="value" role="spinbutton" tabindex="0">${this.value} °C</div>
+          <button class="button minus" type="button" tabindex="-1" aria-label="decrement" @click=${() => this._set(this.value - 0.5)}>
+            <ha-svg-icon .path=${mdi.mdiMinus}></ha-svg-icon></button>
+          <button class="button plus" type="button" tabindex="-1" aria-label="increment" @click=${() => this._set(this.value + 0.5)}>
+            <ha-svg-icon .path=${mdi.mdiPlus}></ha-svg-icon></button>
+        </div>`;
+      }
+      static styles = css`
+        :host {
+          display: block;
+          --control-number-buttons-focus-color: var(--secondary-text-color);
+          --control-number-buttons-background-color: var(--disabled-color);
+          --control-number-buttons-background-opacity: 0.2;
+          --control-number-buttons-border-radius: var(--ha-border-radius-md);
+          --mdc-icon-size: 16px;
+          height: var(--feature-height); width: 100%; color: var(--primary-text-color);
+          font-weight: 500;
+        }
+        .container { position: relative; width: 100%; height: 100%; container-type: inline-size; container-name: container; }
+        .value {
+          display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+          width: 100%; height: 100%; border-radius: var(--control-number-buttons-border-radius);
+          padding: 0; margin: 0; box-sizing: border-box; line-height: 0; z-index: 0; user-select: none; outline: none;
+        }
+        .value::before {
+          content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 100%;
+          background-color: var(--control-number-buttons-background-color);
+          opacity: var(--control-number-buttons-background-opacity);
+        }
+        .button {
+          color: inherit; position: absolute; top: 0; bottom: 0; padding: 0; width: 35px; height: 100%;
+          border: none; background: none; cursor: pointer; outline: none;
+        }
+        .button.minus { left: 0; inset-inline-start: 0; inset-inline-end: initial; }
+        .button.plus { right: 0; inset-inline-start: initial; inset-inline-end: 0; }
+      `;
+    });
+
+    customElements.define('mock-tile-card', class extends ThemedCard {
+      static properties = { ...numberProps, name: {}, icon: {} };
+      render() {
+        return html`<ha-card>
+          <div class="tile"><ha-tile-icon><ha-icon icon=${this.icon}></ha-icon></ha-tile-icon>${this.name}</div>
+          <hui-card-features><ha-control-number-buttons .value=${this.value} .min=${this.min} .max=${this.max}></ha-control-number-buttons></hui-card-features>
+        </ha-card>`;
+      }
+      static styles = css`
+        :host { display: block; --feature-height: 42px; }
+        .tile { display: flex; align-items: center; gap: 10px; padding: 10px; font-weight: 500; font-size: 14px; }
+        ha-tile-icon { display: flex; width: 36px; height: 36px; align-items: center; justify-content: center; color: var(--state-climate-heat-color, #ff8100); --mdc-icon-size: 20px; }
+        hui-card-features { display: block; margin: 0 12px 12px; }
+      `;
+    });
+
+    // --- Bubble Card 3.3.0 media player (DOM from src/cards/media-player/create.js) ---
+    customElements.define('bubble-card', class extends HTMLElement {
+      connectedCallback() {
+        const root = this.attachShadow({ mode: 'open' });
+        root.adoptedStyleSheets = [cardMod];
+        const button = (icon, cls) => `<div class="bubble-media-button ${cls}">
+            <div class="bubble-feedback-container"><div class="bubble-feedback-element feedback-element"></div></div>
+            <ha-icon class="bubble-media-button-icon" icon="${icon}"></ha-icon></div>`;
+        root.innerHTML = `<ha-card style="background:none;border:none;box-shadow:none">
+          <div class="bubble-media-player-container bubble-container">
+            <div class="bubble-media-player bubble-wrapper">
+              <div class="bubble-background bubble-cover-background"></div>
+              <div class="bubble-content-container">
+                <div class="bubble-main-icon-container bubble-icon-container icon-container">
+                  <ha-icon class="bubble-main-icon bubble-icon icon" icon="mdi:television"></ha-icon></div>
+                <div class="bubble-media-info-container">
+                  <div class="bubble-title">Living room TV</div><div class="bubble-artist">On</div></div>
+              </div>
+              <div class="bubble-buttons-container bubble-button-container">
+                ${button('mdi:power', 'bubble-power-button')}${button('mdi:skip-previous', 'bubble-previous-button')}
+                ${button('mdi:skip-next', 'bubble-next-button')}${button('mdi:volume-high', 'bubble-volume-button')}
+                ${button('mdi:play', 'bubble-play-pause-button')}
+              </div>
+            </div>
+            <style>${bubbleBase.replace(/card-type/g, 'media-player')}${bubbleMedia}</style>
+          </div></ha-card>`;
+      }
+    });
+
+    // Bubble button card, state type (src/components/base-card/create.js +
+    // src/cards/button). Taps land on .bubble-background, which Bubble keeps at
+    // opacity .5 while the entity is not an "on" switch.
+    customElements.define('bubble-button', class extends HTMLElement {
+      connectedCallback() {
+        const root = this.attachShadow({ mode: 'open' });
+        root.adoptedStyleSheets = [cardMod];
+        root.innerHTML = `<ha-card style="background:none;border:none;box-shadow:none">
+          <div class="bubble-button-container bubble-container bubble-button-card-container">
+            <div class="bubble-button bubble-wrapper bubble-button-card">
+              <div class="bubble-background bubble-button-background bubble-action bubble-action-enabled"
+                style="opacity:.5;--bubble-button-background-color:rgba(0,0,0,0)"></div>
+              <div class="bubble-content-container">
+                <div class="bubble-main-icon-container bubble-icon-container icon-container bubble-action bubble-action-enabled">
+                  <ha-icon class="bubble-main-icon bubble-icon icon" icon="mdi:cat"></ha-icon></div>
+                <div class="bubble-name-container name-container">
+                  <div class="bubble-name name">Pet Status</div><div class="bubble-state state">Not eating</div></div>
+              </div>
+              <div class="bubble-buttons-container"></div>
+            </div>
+            <style>${bubbleBase.replace(/card-type/g, 'button')}${bubbleButton}</style>
+          </div></ha-card>`;
+      }
+    });
+
+    // --- Mushroom 5.2.3 template badge (src/badges/template/template-badge.ts) ---
+    customElements.define('mushroom-template-badge', class extends LitElement {
+      render() {
+        return html`<div class="badge" role="button" tabindex="0">
+          <img src="https://unpkg.com/@lobehub/icons-static-png@latest/dark/claude-color.png" aria-hidden="true">
+          <span class="info"><span class="label">Claude.Ai</span><span class="content">👤 42% | 💼 7%</span></span>
+        </div>`;
+      }
+      static styles = css`
+        :host { -webkit-tap-highlight-color: transparent; }
+        .badge {
+          position: relative; transition: box-shadow 180ms ease-in-out, border-color 180ms ease-in-out;
+          display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
+          height: var(--ha-badge-size, 36px); min-width: var(--ha-badge-size, 36px); padding: 0px 8px;
+          box-sizing: border-box; width: auto;
+          border-radius: var(--ha-badge-border-radius, calc(var(--ha-badge-size, 36px) / 2));
+          background: var(--ha-card-background, var(--card-background-color, white));
+          border-width: var(--ha-card-border-width, 1px); box-shadow: var(--ha-card-box-shadow, none);
+          border-style: solid; border-color: var(--ha-card-border-color, var(--divider-color, #e0e0e0));
+          --mdc-icon-size: 18px; text-align: center;
+        }
+        [role="button"] { cursor: pointer; }
+        [role="button"]:focus { outline: none; }
+        .info { display: flex; flex-direction: column; align-items: flex-start; padding-inline-end: 4px; }
+        .label { font-size: 10px; font-weight: 500; line-height: 10px; letter-spacing: 0.1px; color: var(--secondary-text-color); }
+        .content { font-size: 12px; font-weight: 500; line-height: 16px; letter-spacing: 0.1px; color: var(--primary-text-color); }
+        img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; overflow: hidden; margin-inline-start: -6px; }
+      `;
+    });
+
+    // card-mod 4 src/mod-card.ts: <ha-card modcard> around the child, plus its
+    // NO_STYLE and the user's "." style from the Claude.Ai card.
+    const modCardStyle = new CSSStyleSheet();
+    modCardStyle.replaceSync(`
+      ha-card { background: none; box-shadow: none; border: none; transition: none; }
+      ha-card { background: none !important; border: none !important; box-shadow: none !important; }`);
+    customElements.define('mod-card', class extends LitElement {
+      createRenderRoot() {
+        const root = super.createRenderRoot();
+        root.adoptedStyleSheets = [cardMod, modCardStyle];
+        return root;
+      }
+      render() { return html`<ha-card modcard><mushroom-template-badge></mushroom-template-badge></ha-card>`; }
+    });
+
+    document.getElementById('status').textContent =
+      `press module: ${window.__neumorphismPress ? 'loaded' : 'MISSING'}`;
+  </script>
+</body>
+</html>

@@ -9,6 +9,9 @@ Neumorphism:
   soft-shadow-raised: 6px 6px 12px var(--soft-shadow-dark), -6px -6px 12px var(--soft-shadow-light)
   soft-shadow-small: 3px 3px 6px var(--soft-shadow-dark), -3px -3px 6px var(--soft-shadow-light)
   soft-shadow-inset: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light)
+  # How far a ± control rocks toward the pressed side (needs neumorphism-press.js).
+  soft-rocker-tilt: 12deg
+  soft-rocker-perspective: 150cqw
 
   # Home Assistant surfaces, including the current semantic color system.
   primary-background-color: var(--soft-surface)
@@ -248,6 +251,12 @@ Neumorphism:
       box-shadow: var(--soft-shadow-inset) !important;
       transition: none !important;
     }
+    /* Accent-filled play button: the surface-coloured inset smudges the teal,
+       so press it with neutral shade/highlight instead. The press module reads
+       this per-element value too. */
+    .bubble-play-pause-button {
+      --soft-shadow-inset: inset 3px 3px 6px rgba(0, 0, 0, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
+    }
     .bubble-range-slider, .bubble-sub-button-slider {
       box-shadow: var(--soft-shadow-inset);
     }
@@ -285,19 +294,19 @@ Neumorphism:
     }
     /* Thermostat card + modern more-info controls: recessed troughs. The
        circular slider is an SVG stroke, so its solid recess colour (set via
-       the control-circular-slider-* variables above) is the achievable depth. */
-    ha-control-select, ha-control-slider, ha-control-number-buttons {
+       the control-circular-slider-* variables above) is the achievable depth.
+       ± number controls (Mushroom rockers, HA's numeric feature) are raised
+       instead, styled from neumorphism-press.js. */
+    ha-control-select, ha-control-slider {
       border-radius: var(--soft-control-radius);
       box-shadow: var(--soft-shadow-inset);
     }
     mushroom-light-brightness-control,
     mushroom-light-color-temp-control,
     mushroom-light-color-control,
-    mushroom-number-value-control,
     mushroom-cover-position-control,
     mushroom-cover-tilt-position-control,
     mushroom-fan-percentage-control,
-    mushroom-climate-temperature-control,
     mushroom-media-player-volume-control,
     mushroom-humidifier-humidity-control,
     hui-card-features {

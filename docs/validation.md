@@ -64,3 +64,26 @@ common exposed hosts. The held-down intermediate frame is not reliably captured
 by browser automation; verify the visible press/release effect with the README
 checklist, including a native badge and a Mushroom template badge that have a
 `tap_action`.
+
+## v1.0.9 follow-up — ± rockers, Bubble presses, mod-card
+
+`tests/preview.html` renders the real theme YAML and press module into stand-in
+cards that copy the upstream markup and CSS of Mushroom 5.2.3 (number buttons and
+slider, template badge), HA frontend 20260826.6 (`ha-control-number-buttons`),
+card-mod's `mod-card`, and Bubble Card 3.3.0 (media player, state button; CSS
+fetched from its repository). In that page, at 375px and desktop widths, in both
+palettes:
+
+- Mushroom's ± pill and HA's numeric feature are raised with round raised
+  buttons; holding a Mushroom ± rocks the pill toward the pressed side (the
+  pressed button sinks, the other lifts); the number slider mode stays recessed.
+- Pressing a Bubble media button sinks the button, not the icon inside it (the
+  icon inherits `cursor: pointer`); the accent play button presses in cleanly.
+- Pressing a Bubble state button sinks its visible pill rather than the
+  half-transparent tap layer behind the text.
+- A Mushroom template badge wrapped in `mod-card` sinks on press.
+
+`node tests/check_press.mjs` covers the pressed-side marker, icon skipping, the
+Bubble pill redirect, and the injected rocker styles. These are stand-in checks,
+not a live Home Assistant session; confirm on the installation that
+`window.__neumorphismPress` is `true`.
