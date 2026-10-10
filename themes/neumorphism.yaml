@@ -257,7 +257,11 @@ Neumorphism:
     .bubble-play-pause-button {
       --soft-shadow-inset: inset 3px 3px 6px rgba(0, 0, 0, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
     }
-    .bubble-range-slider, .bubble-sub-button-slider {
+    /* Slider buttons (e.g. volume) stay raised like any other Bubble button:
+       the card is the control, so its fill must not read as a hole. Compact
+       sub-button sliders remain recessed tracks. */
+    .bubble-range-slider { box-shadow: none; }
+    .bubble-sub-button-slider {
       box-shadow: var(--soft-shadow-inset);
     }
     .bubble-pop-up-background {
