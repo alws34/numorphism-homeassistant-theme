@@ -22,6 +22,7 @@ class FakeElement {
       removeProperty: (property) => this.inlineStyles.delete(property),
     };
   }
+  get localName() { return this.tag ?? 'div'; }
   matches(selector) { return this.isExplicitButton && selector.includes('button,'); }
   hasAttribute(name) { return this.attributes.has(name); }
   getAttribute() { return null; }
@@ -49,7 +50,9 @@ runInNewContext(readFileSync(new URL('../frontend/neumorphism-press.js', import.
   window: { addEventListener: (name, handler) => windowListeners.set(name, handler) },
   getComputedStyle: (element) => ({
     getPropertyValue: (property) =>
-      property === '--soft-shadow-inset' ? (themeDefinesInsetShadow ? 'inset 3px 3px 6px #171d25' : '') : '',
+      !themeDefinesInsetShadow ? ''
+        : property === '--soft-shadow-inset' ? 'inset 3px 3px 6px #171d25'
+        : property === '--soft-shadow-inset-deep' ? 'inset 6px 6px 12px #171d25' : '',
     cursor: element.cursor,
     display: element.display,
     backgroundColor: element.backgroundColor,
@@ -144,6 +147,26 @@ fire('pointerup', stateBadge);
 const contentsWrapper = new FakeElement({ cursor: 'pointer', display: 'contents' });
 fire('pointerdown', contentsWrapper); assert.equal(boxShadow(contentsWrapper), 'original-shadow');
 
+// button-card: decorative pills/rings inside the card inherit cursor:pointer and
+// have fills; the raised card sinks, and deeper, since it is large.
+const buttonCard = new FakeElement({ tag: 'ha-card', cursor: 'pointer', width: 374, height: 132, boxShadow: '6px 6px 12px #171d25' });
+const pill = new FakeElement({
+  cursor: 'pointer', display: 'inline-flex', borderRadius: '999px', backgroundColor: 'rgb(53, 65, 80)',
+  boxShadow: '3px 3px 6px #171d25', // raised by the card template, but only decoration
+});
+const customField = new FakeElement({ cursor: 'pointer', width: 364, height: 114 });
+pressPath(pill, customField, buttonCard, new FakeElement());
+assert.equal(boxShadow(pill), 'original-shadow');
+assert.equal(boxShadow(buttonCard), 'inset 6px 6px 12px #171d25');
+fire('pointerup', pill);
+
+// A nested raised button inside that card (the lock button) presses on its own.
+const lockButton = new FakeElement({ tag: 'ha-card', cursor: 'pointer', width: 58, height: 58, boxShadow: '3px 3px 6px #171d25' });
+pressPath(new FakeElement({ cursor: 'pointer', width: 58, height: 58 }), lockButton, customField, buttonCard);
+assert.equal(boxShadow(lockButton), 'inset 3px 3px 6px #171d25');
+assert.equal(boxShadow(buttonCard), 'original-shadow');
+fire('pointerup', lockButton);
+
 // Inline text link: clickable but must not get a card press.
 const inlineLink = new FakeElement({ cursor: 'pointer', display: 'inline' });
 fire('pointerdown', inlineLink); assert.equal(boxShadow(inlineLink), 'original-shadow');
@@ -166,4 +189,4 @@ for (const tag of ['mushroom-input-number']) {
 }
 assert.match(deepCss('mushroom-number-value-control'), /mushroom-slider \{[^}]*--soft-shadow-inset/);
 
-console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, ± rocker styles');
+console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, decorative content ignored, nested raised buttons, deep inset on big cards, ± rocker styles');

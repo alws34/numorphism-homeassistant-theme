@@ -18,39 +18,37 @@
     );
   }
 
-  // The innermost real button wins; otherwise the innermost element the frontend
-  // renders as clickable. Home Assistant, Mushroom and Bubble all set
-  // cursor:pointer on actionable surfaces (tiles, entity rows, badges, chips,
-  // card tap targets) and never on inert ones, so this covers every card type
-  // including the built-in ones. Plain inline elements (text links) and
-  // box-less display:contents wrappers are excluded; inline-block/-flex
-  // buttons are not.
-  // cursor is inherited, so an icon inside a clickable div also reports
-  // pointer: skip an element whose parent is pointer too unless it paints its
-  // own surface (a nested sub-button does; a bare icon does not).
+  // The innermost real button wins. Otherwise use the cursor: Home Assistant,
+  // Mushroom, Bubble and button-card set cursor:pointer on actionable surfaces
+  // (tiles, entity rows, badges, chips, card tap targets) and never on inert
+  // ones, so this covers every card type including the built-in ones.
+  // cursor is inherited, so the pointer elements from the tapped one outward
+  // are one clickable thing plus its content (icons, pills, rings — even
+  // raised ones a card template draws for decoration). Its surface is the
+  // innermost raised card in that run — a nested card with its own action,
+  // like a lock button-card inside a button-card — else the outermost element
+  // with a box. Plain inline elements (text links) and display:contents wrappers have
+  // no box to press; inline-block/-flex buttons do.
   function findPressableSurface(eventPath, isPointerEvent) {
     for (const element of eventPath) {
       if (element.matches(EXPLICIT_BUTTON_SELECTOR) && hasBox(getComputedStyle(element))) return element;
     }
     if (!isPointerEvent) return null;
-    for (const [index, element] of eventPath.entries()) {
+    const start = eventPath.findIndex((element) => getComputedStyle(element).cursor === 'pointer');
+    if (start < 0) return null;
+    let surface = null;
+    for (const element of eventPath.slice(start)) {
       const computedStyle = getComputedStyle(element);
-      if (computedStyle.cursor !== 'pointer' || !hasBox(computedStyle)) continue;
-      const parent = eventPath[index + 1];
-      const inheritsPointer = parent && getComputedStyle(parent).cursor === 'pointer';
-      if (!inheritsPointer || paintsOwnSurface(computedStyle)) return element;
+      if (computedStyle.cursor !== 'pointer') break;
+      if (!hasBox(computedStyle)) continue;
+      if (element.localName === 'ha-card' && computedStyle.boxShadow !== 'none') return element;
+      surface = element;
     }
-    return null;
+    return surface;
   }
 
   function hasBox(computedStyle) {
     return computedStyle.display !== 'inline' && computedStyle.display !== 'contents';
-  }
-
-  // A fill or a shadow makes a surface; rounded corners alone do not (a round
-  // state icon inside a clickable entity row presses the row).
-  function paintsOwnSurface(computedStyle) {
-    return isOpaque(computedStyle) || computedStyle.boxShadow !== 'none';
   }
 
   function isOpaque(computedStyle) {
@@ -113,6 +111,8 @@
     };
   }
 
+  const DEEP_PRESS_MIN_SIZE = 80;
+
   // Sinks one surface and returns a function restoring its exact inline styles.
   // Square surfaces (entity rows, state items) get rounded corners while held,
   // so the press reads as a soft well rather than a hard-edged box.
@@ -124,7 +124,13 @@
       surface.style.getPropertyPriority(property),
     ]);
     // Read per surface: accent-filled buttons override it with a tinted inset.
-    surface.style.setProperty('box-shadow', computedStyle.getPropertyValue('--soft-shadow-inset').trim(), 'important');
+    // A 3px inset that reads well on a pill vanishes on a large card, so big
+    // surfaces sink as deep as they are raised.
+    const { width, height } = surface.getBoundingClientRect();
+    const deep = Math.min(width, height) >= DEEP_PRESS_MIN_SIZE &&
+      computedStyle.getPropertyValue('--soft-shadow-inset-deep').trim();
+    const inset = deep || computedStyle.getPropertyValue('--soft-shadow-inset').trim();
+    surface.style.setProperty('box-shadow', inset, 'important');
     surface.style.setProperty('transition', 'none', 'important');
     if (computedStyle.borderRadius === '0px') {
       surface.style.setProperty('border-radius', 'var(--soft-control-radius)', 'important');
