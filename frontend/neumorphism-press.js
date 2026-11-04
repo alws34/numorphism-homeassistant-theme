@@ -22,18 +22,20 @@
   // renders as clickable. Home Assistant, Mushroom and Bubble all set
   // cursor:pointer on actionable surfaces (tiles, entity rows, badges, chips,
   // card tap targets) and never on inert ones, so this covers every card type
-  // including the built-in ones. Inline elements (text links) are excluded.
+  // including the built-in ones. Plain inline elements (text links) and
+  // box-less display:contents wrappers are excluded; inline-block/-flex
+  // buttons are not.
   // cursor is inherited, so an icon inside a clickable div also reports
   // pointer: skip an element whose parent is pointer too unless it paints its
   // own surface (a nested sub-button does; a bare icon does not).
   function findPressableSurface(eventPath, isPointerEvent) {
     for (const element of eventPath) {
-      if (element.matches(EXPLICIT_BUTTON_SELECTOR)) return element;
+      if (element.matches(EXPLICIT_BUTTON_SELECTOR) && hasBox(getComputedStyle(element))) return element;
     }
     if (!isPointerEvent) return null;
     for (const [index, element] of eventPath.entries()) {
       const computedStyle = getComputedStyle(element);
-      if (computedStyle.cursor !== 'pointer' || computedStyle.display.startsWith('inline')) continue;
+      if (computedStyle.cursor !== 'pointer' || !hasBox(computedStyle)) continue;
       const parent = eventPath[index + 1];
       const inheritsPointer = parent && getComputedStyle(parent).cursor === 'pointer';
       if (!inheritsPointer || paintsOwnSurface(computedStyle)) return element;
@@ -41,12 +43,44 @@
     return null;
   }
 
+  function hasBox(computedStyle) {
+    return computedStyle.display !== 'inline' && computedStyle.display !== 'contents';
+  }
+
+  // A fill or a shadow makes a surface; rounded corners alone do not (a round
+  // state icon inside a clickable entity row presses the row).
   function paintsOwnSurface(computedStyle) {
-    return (
-      computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' ||
-      computedStyle.boxShadow !== 'none' ||
-      computedStyle.borderRadius !== '0px'
-    );
+    return isOpaque(computedStyle) || computedStyle.boxShadow !== 'none';
+  }
+
+  function isOpaque(computedStyle) {
+    return computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)';
+  }
+
+  // The element that takes the tap is often not the one that looks like the
+  // button: tile and Bubble cards lay a full-size tap layer over the raised
+  // card, Mushroom cards take taps on a state item inside it. When the tap
+  // target is not raised itself, press the nearest raised ancestor it covers
+  // most of. An opaque tap layer (a Bubble switch that is on) stays pressed
+  // too, or it would hide that ancestor's inset.
+  // ponytail: "covers most of" is an area ratio; an entities-card row covers
+  // a small part of its card, so it keeps its own (rounded) press.
+  const MIN_COVERAGE = 0.4;
+  function visibleSurfaces(tapTarget, eventPath) {
+    const targetStyle = getComputedStyle(tapTarget);
+    if (targetStyle.boxShadow !== 'none') return [tapTarget];
+    const targetArea = area(tapTarget);
+    for (const ancestor of eventPath.slice(eventPath.indexOf(tapTarget) + 1)) {
+      if (getComputedStyle(ancestor).boxShadow === 'none') continue;
+      if (targetArea < area(ancestor) * MIN_COVERAGE) break;
+      return isOpaque(targetStyle) ? [ancestor, tapTarget] : [ancestor];
+    }
+    return [tapTarget];
+  }
+
+  function area(element) {
+    const { width, height } = element.getBoundingClientRect();
+    return width * height;
   }
 
   function onPressStart(event) {
@@ -61,37 +95,45 @@
     const eventPath = event.composedPath().filter((node) => node instanceof Element);
     if (eventPath.some(isDisabled)) return;
 
-    let surface = findPressableSurface(eventPath, event.type === 'pointerdown');
-    if (!surface) return;
-    // Bubble cards take taps on a see-through layer behind the text (opacity
-    // .5 unless a switch is on); press the card's visible pill instead.
-    if (surface.classList?.contains('bubble-background')) {
-      surface = surface.closest('.bubble-container') ?? surface;
-    }
-
-    const insetShadow = getComputedStyle(surface).getPropertyValue('--soft-shadow-inset').trim();
-    if (!insetShadow) return;
+    const tapTarget = findPressableSurface(eventPath, event.type === 'pointerdown');
+    if (!tapTarget) return;
+    if (!getComputedStyle(tapTarget).getPropertyValue('--soft-shadow-inset').trim()) return;
 
     releasePressedSurface();
 
-    const savedInlineStyles = ['box-shadow', 'transition'].map((property) => [
+    const restorers = visibleSurfaces(tapTarget, eventPath).map(pressSurface);
+    // Lets styles inside the tap target's own shadow root react to the press
+    // (the ± rocker below); `:active` alone is unreliable on iOS touch.
+    tapTarget.setAttribute('data-soft-pressed', '');
+
+    releasePressedSurface = () => {
+      for (const restore of restorers) restore();
+      tapTarget.removeAttribute('data-soft-pressed');
+      releasePressedSurface = () => {};
+    };
+  }
+
+  // Sinks one surface and returns a function restoring its exact inline styles.
+  // Square surfaces (entity rows, state items) get rounded corners while held,
+  // so the press reads as a soft well rather than a hard-edged box.
+  function pressSurface(surface) {
+    const computedStyle = getComputedStyle(surface);
+    const saved = ['box-shadow', 'transition', 'border-radius'].map((property) => [
       property,
       surface.style.getPropertyValue(property),
       surface.style.getPropertyPriority(property),
     ]);
-    surface.style.setProperty('box-shadow', insetShadow, 'important');
+    // Read per surface: accent-filled buttons override it with a tinted inset.
+    surface.style.setProperty('box-shadow', computedStyle.getPropertyValue('--soft-shadow-inset').trim(), 'important');
     surface.style.setProperty('transition', 'none', 'important');
-    // Lets styles inside the surface's own shadow root react to the press
-    // (the ± rocker below); `:active` alone is unreliable on iOS touch.
-    surface.setAttribute('data-soft-pressed', '');
-
-    releasePressedSurface = () => {
-      for (const [property, value, priority] of savedInlineStyles) {
+    if (computedStyle.borderRadius === '0px') {
+      surface.style.setProperty('border-radius', 'var(--soft-control-radius)', 'important');
+    }
+    return () => {
+      for (const [property, value, priority] of saved) {
         if (value) surface.style.setProperty(property, value, priority);
         else surface.style.removeProperty(property);
       }
-      surface.removeAttribute('data-soft-pressed');
-      releasePressedSurface = () => {};
     };
   }
 

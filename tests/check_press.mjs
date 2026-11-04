@@ -11,6 +11,7 @@ class FakeElement {
     Object.assign(this, {
       isExplicitButton: false, cursor: 'auto', display: 'block', disabled: false,
       backgroundColor: 'rgba(0, 0, 0, 0)', boxShadow: 'none', borderRadius: '0px',
+      width: 100, height: 40,
     }, options);
     this.inlineStyles = new Map([['box-shadow', ['original-shadow', 'important']]]);
     this.attributes = new Set();
@@ -26,6 +27,7 @@ class FakeElement {
   getAttribute() { return null; }
   setAttribute(name) { this.attributes.add(name); }
   removeAttribute(name) { this.attributes.delete(name); }
+  getBoundingClientRect() { return { width: this.width, height: this.height }; }
 }
 
 // Lit component classes whose static styles the module extends.
@@ -58,6 +60,8 @@ runInNewContext(readFileSync(new URL('../frontend/neumorphism-press.js', import.
 
 const fire = (type, target, extra = {}) =>
   documentListeners.get(type)({ type, button: 0, composedPath: () => [target], ...extra });
+const pressPath = (...path) =>
+  documentListeners.get('pointerdown')({ type: 'pointerdown', button: 0, composedPath: () => path });
 const boxShadow = (element) => element.style.getPropertyValue('box-shadow');
 
 // Explicit button: press / release / cancel / keyboard / blur / disabled / theme opt-in.
@@ -89,23 +93,56 @@ fire('pointerup', badge); assert.equal(boxShadow(badge), 'original-shadow');
 // Icon inside a clickable div inherits cursor:pointer; the div, not the icon, is pressed.
 const mediaButton = new FakeElement({ cursor: 'pointer', backgroundColor: 'rgb(37, 45, 56)' });
 const icon = new FakeElement({ cursor: 'pointer', display: 'flex' });
-documentListeners.get('pointerdown')({ type: 'pointerdown', button: 0, composedPath: () => [icon, mediaButton] });
+pressPath(icon, mediaButton);
 assert.equal(boxShadow(icon), 'original-shadow');
 assert.match(boxShadow(mediaButton), /^inset/);
 fire('pointerup', mediaButton);
 
-// Bubble's tap layer sits behind the text at half opacity; its visible pill is pressed.
-const bubblePill = new FakeElement();
-const bubbleLayer = new FakeElement({
-  cursor: 'pointer', borderRadius: '24px',
-  classList: { contains: (name) => name === 'bubble-background' },
-  closest: (selector) => (selector === '.bubble-container' ? bubblePill : null),
+// Full-size see-through tap layer over a raised card (Bubble button, HA tile):
+// the raised card sinks, not the layer.
+const card = { width: 300, height: 56, boxShadow: '6px 6px 12px #171d25' };
+const raisedCard = new FakeElement(card);
+const wrapper = new FakeElement({ width: 300, height: 56 });
+const tapLayer = new FakeElement({ cursor: 'pointer', borderRadius: '24px', width: 300, height: 56 });
+pressPath(tapLayer, wrapper, raisedCard);
+assert.equal(boxShadow(tapLayer), 'original-shadow');
+assert.match(boxShadow(raisedCard), /^inset/);
+fire('pointerup', tapLayer);
+assert.equal(boxShadow(raisedCard), 'original-shadow');
+
+// An opaque tap layer (Bubble switch that is on) would hide the card's inset: both sink.
+const opaqueLayer = new FakeElement({
+  cursor: 'pointer', borderRadius: '24px', width: 300, height: 56, backgroundColor: 'rgb(41, 70, 75)',
 });
-fire('pointerdown', bubbleLayer);
-assert.equal(boxShadow(bubbleLayer), 'original-shadow');
-assert.match(boxShadow(bubblePill), /^inset/);
-fire('pointerup', bubbleLayer);
-assert.equal(boxShadow(bubblePill), 'original-shadow');
+pressPath(opaqueLayer, raisedCard);
+assert.match(boxShadow(opaqueLayer), /^inset/);
+assert.match(boxShadow(raisedCard), /^inset/);
+fire('pointerup', opaqueLayer);
+assert.equal(boxShadow(opaqueLayer), 'original-shadow');
+
+// Mushroom state item inside a card it mostly fills: the card sinks.
+const stateItem = new FakeElement({ cursor: 'pointer', borderRadius: '0px', width: 276, height: 42 });
+pressPath(stateItem, new FakeElement({ width: 300, height: 66, ...card }));
+assert.equal(boxShadow(stateItem), 'original-shadow');
+fire('pointerup', stateItem);
+
+// Entities-card row: a small part of its card, so the row itself sinks, with
+// rounded corners while held and its exact radius restored after.
+const row = new FakeElement({ cursor: 'pointer', borderRadius: '0px', width: 300, height: 40 });
+const entitiesCard = new FakeElement({ width: 300, height: 220, boxShadow: '6px 6px 12px #171d25' });
+pressPath(row, entitiesCard);
+assert.match(boxShadow(row), /^inset/);
+assert.equal(boxShadow(entitiesCard), 'original-shadow');
+assert.equal(row.style.getPropertyValue('border-radius'), 'var(--soft-control-radius)');
+fire('pointerup', row);
+assert.equal(row.style.getPropertyValue('border-radius'), '');
+
+// inline-flex buttons (state badges, chips) are pressable; display:contents wrappers are not.
+const stateBadge = new FakeElement({ cursor: 'pointer', display: 'inline-flex', borderRadius: '50%' });
+fire('pointerdown', stateBadge); assert.match(boxShadow(stateBadge), /^inset/);
+fire('pointerup', stateBadge);
+const contentsWrapper = new FakeElement({ cursor: 'pointer', display: 'contents' });
+fire('pointerdown', contentsWrapper); assert.equal(boxShadow(contentsWrapper), 'original-shadow');
 
 // Inline text link: clickable but must not get a card press.
 const inlineLink = new FakeElement({ cursor: 'pointer', display: 'inline' });
@@ -129,4 +166,4 @@ for (const tag of ['mushroom-input-number']) {
 }
 assert.match(deepCss('mushroom-number-value-control'), /mushroom-slider \{[^}]*--soft-shadow-inset/);
 
-console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, Bubble pill pressed, ± rocker styles');
+console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, ± rocker styles');

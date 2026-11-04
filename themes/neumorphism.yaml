@@ -251,10 +251,11 @@ Neumorphism:
       box-shadow: var(--soft-shadow-inset) !important;
       transition: none !important;
     }
-    /* Accent-filled play button: the surface-coloured inset smudges the teal,
-       so press it with neutral shade/highlight instead. The press module reads
-       this per-element value too. */
-    .bubble-play-pause-button {
+    /* Accent-filled play button and a Bubble button's coloured background
+       layer (a switch that is on): the surface-coloured inset smudges the
+       accent, so press them with neutral shade/highlight instead. The press
+       module reads this per-element value too. */
+    .bubble-play-pause-button, .bubble-background {
       --soft-shadow-inset: inset 3px 3px 6px rgba(0, 0, 0, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
     }
     /* Slider buttons (e.g. volume) stay raised like any other Bubble button:

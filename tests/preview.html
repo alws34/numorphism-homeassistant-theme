@@ -57,6 +57,21 @@
   <h2>Bubble Card button · button_type: state (like Pet Status)</h2>
   <div class="wide"><bubble-button></bubble-button></div>
 
+  <h2>Bubble Card button · switch ON (opaque accent layer)</h2>
+  <div class="wide"><bubble-button on></bubble-button></div>
+
+  <h2>HA tile card (tap layer over the raised card)</h2>
+  <div class="grid"><mock-ha-tile></mock-ha-tile></div>
+
+  <h2>Mushroom entity card (taps land on the state item)</h2>
+  <div class="grid"><mock-mushroom-entity></mock-mushroom-entity></div>
+
+  <h2>HA entities card rows</h2>
+  <div class="grid"><mock-entities-card></mock-entities-card></div>
+
+  <h2>Mushroom chips</h2>
+  <div class="wide"><mock-chips></mock-chips></div>
+
   <h2>card-mod mod-card wrapping a Mushroom template badge (like Claude.Ai)</h2>
   <div class="grid"><mod-card></mod-card></div>
 
@@ -351,22 +366,130 @@
       connectedCallback() {
         const root = this.attachShadow({ mode: 'open' });
         root.adoptedStyleSheets = [cardMod];
+        // A switch that is on: Bubble paints the layer with the accent at opacity 1.
+        const on = this.hasAttribute('on');
+        const layer = on
+          ? 'opacity:1;--bubble-button-background-color:var(--bubble-button-accent-color, var(--bubble-accent-color))'
+          : 'opacity:.5;--bubble-button-background-color:rgba(0,0,0,0)';
         root.innerHTML = `<ha-card style="background:none;border:none;box-shadow:none">
           <div class="bubble-button-container bubble-container bubble-button-card-container">
             <div class="bubble-button bubble-wrapper bubble-button-card">
               <div class="bubble-background bubble-button-background bubble-action bubble-action-enabled"
-                style="opacity:.5;--bubble-button-background-color:rgba(0,0,0,0)"></div>
+                style="${layer}"></div>
               <div class="bubble-content-container">
                 <div class="bubble-main-icon-container bubble-icon-container icon-container bubble-action bubble-action-enabled">
-                  <ha-icon class="bubble-main-icon bubble-icon icon" icon="mdi:cat"></ha-icon></div>
+                  <ha-icon class="bubble-main-icon bubble-icon icon" icon="${on ? 'mdi:lightbulb' : 'mdi:cat'}"></ha-icon></div>
                 <div class="bubble-name-container name-container">
-                  <div class="bubble-name name">Pet Status</div><div class="bubble-state state">Not eating</div></div>
+                  <div class="bubble-name name">${on ? 'Living room light' : 'Pet Status'}</div>
+                  <div class="bubble-state state">${on ? 'On' : 'Not eating'}</div></div>
               </div>
               <div class="bubble-buttons-container"></div>
             </div>
             <style>${bubbleBase.replace(/card-type/g, 'button')}${bubbleButton}</style>
           </div></ha-card>`;
       }
+    });
+
+    // --- HA frontend tile card (hui-tile-card + components/tile/ha-tile-container) ---
+    // Taps land on .background, a full-size layer over the raised ha-card; the
+    // content row has pointer-events: none.
+    customElements.define('ha-tile-container', class extends LitElement {
+      render() {
+        return html`<div class="background" role="button" tabindex="0"></div>
+          <div class="container"><div class="content"><slot name="icon"></slot><slot name="info"></slot></div></div>`;
+      }
+      static styles = css`
+        :host { height: 100%; width: 100%; display: flex; flex-direction: column; }
+        .background {
+          position: absolute; inset: 0; overflow: hidden; margin: calc(-1 * var(--ha-card-border-width, 1px));
+          border-radius: var(--ha-card-border-radius, 12px);
+        }
+        [role="button"] { cursor: pointer; }
+        .container { display: flex; flex-direction: column; flex: 1; }
+        .content {
+          position: relative; display: flex; align-items: center; padding: 0 10px; min-height: 56px;
+          box-sizing: border-box; pointer-events: none; gap: 10px;
+        }
+      `;
+    });
+    customElements.define('mock-ha-tile', class extends ThemedCard {
+      render() {
+        return html`<ha-card><ha-tile-container>
+          <ha-tile-icon slot="icon"><ha-icon icon="mdi:sofa"></ha-icon></ha-tile-icon>
+          <div slot="info" class="info"><b>Living room</b><span>3 lights on</span></div>
+        </ha-tile-container></ha-card>`;
+      }
+      static styles = css`
+        :host { display: block; }
+        ha-tile-icon { display: flex; width: 36px; height: 36px; align-items: center; justify-content: center; color: var(--primary-color); --mdc-icon-size: 20px; }
+        .info { display: flex; flex-direction: column; font-size: 14px; gap: 2px; }
+        .info span { font-size: 12px; color: var(--secondary-text-color); }
+      `;
+    });
+
+    // --- Mushroom entity card: taps land on mushroom-state-item (cursor: pointer). ---
+    customElements.define('mock-mushroom-entity', class extends ThemedCard {
+      render() {
+        return html`<ha-card><mushroom-card><mushroom-state-item>
+          <mushroom-shape-icon><ha-icon icon="mdi:washing-machine"></ha-icon></mushroom-shape-icon>
+          <div class="info"><b>Washer</b><span>Idle</span></div>
+        </mushroom-state-item></mushroom-card></ha-card>`;
+      }
+      static styles = css`
+        :host { display: block; --rgb-state-number: var(--rgb-primary-color); }
+        ha-card { display: flex; flex-direction: column; }
+        mushroom-card { display: block; padding: var(--mush-spacing, 12px); }
+        mushroom-state-item { cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .info { display: flex; flex-direction: column; font-size: 14px; }
+        .info span { font-size: 12px; color: var(--secondary-text-color); }
+      `;
+    });
+
+    // --- HA entities card: each hui-generic-entity-row's .row.pointer is the target. ---
+    customElements.define('mock-entities-card', class extends ThemedCard {
+      render() {
+        const row = (icon, name, state) => html`<div class="row pointer">
+          <state-badge><ha-icon icon=${icon}></ha-icon></state-badge><div class="info">${name}</div><div class="state">${state}</div></div>`;
+        return html`<ha-card><div class="card-content">
+          ${row('mdi:thermometer', 'Living room temperature', '22.4 °C')}
+          ${row('mdi:door', 'Front door', 'Closed')}
+          ${row('mdi:battery', 'Lock battery', '86 %')}
+        </div></ha-card>`;
+      }
+      static styles = css`
+        :host { display: block; }
+        .card-content { padding: 8px 16px; }
+        .row { display: flex; align-items: center; height: 40px; margin: 4px 0; gap: 16px; font-size: 14px; }
+        .pointer { cursor: pointer; }
+        state-badge { display: inline-flex; flex: 0 0 40px; height: 40px; align-items: center; justify-content: center; border-radius: 50%; color: var(--state-icon-color); }
+        .info { flex: 1; }
+        .state { color: var(--secondary-text-color); }
+      `;
+    });
+
+    // --- Mushroom chips (src/shared/chip.ts): the template chip sets cursor on the
+    // mushroom-chip host; the visible pill is the ha-card in its shadow root. ---
+    customElements.define('mushroom-chip', class extends LitElement {
+      render() { return html`<ha-card class="chip"><slot></slot></ha-card>`; }
+      static styles = css`
+        ha-card {
+          box-sizing: border-box; height: var(--mush-chip-height, 36px); padding: 0 12px; gap: 6px;
+          display: flex; flex-direction: row; align-items: center; font-size: 12px; font-weight: bold;
+          border-radius: var(--mush-chip-border-radius, 18px); background: var(--mush-chip-background);
+          border: var(--mush-chip-border-width, 1px) solid var(--mush-chip-border-color);
+          box-shadow: var(--mush-chip-box-shadow); --mdc-icon-size: 16px;
+        }
+      `;
+    });
+    customElements.define('mock-chips', class extends ThemedCard {
+      render() {
+        const chip = (icon, text) => html`<mushroom-chip><ha-icon icon=${icon}></ha-icon><span>${text}</span></mushroom-chip>`;
+        return html`<div class="chips">${chip('mdi:home', 'Home')}${chip('mdi:weather-sunny', '24 °C')}${chip('mdi:lightning-bolt', '412 W')}</div>`;
+      }
+      static styles = css`
+        .chips { display: flex; gap: var(--mush-chip-spacing, 12px); flex-wrap: wrap; padding: 4px; }
+        mushroom-chip { cursor: pointer; }
+      `;
     });
 
     // --- Mushroom 5.2.3 template badge (src/badges/template/template-badge.ts) ---
