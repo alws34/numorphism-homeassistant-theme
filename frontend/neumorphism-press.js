@@ -101,7 +101,8 @@
 
     releasePressedSurface();
 
-    const restorers = visibleSurfaces(tapTarget, eventPath).map(pressSurface);
+    const surfaces = visibleSurfaces(tapTarget, eventPath);
+    const restorers = [...surfaces, ...surfaces.flatMap(raisedDecorations)].map(pressSurface);
     // Lets styles inside the tap target's own shadow root react to the press
     // (the ± rocker below); `:active` alone is unreliable on iOS touch.
     tapTarget.setAttribute('data-soft-pressed', '');
@@ -111,6 +112,21 @@
       tapTarget.removeAttribute('data-soft-pressed');
       releasePressedSurface = () => {};
     };
+  }
+
+  // Raised shapes a card draws inside itself (icon rings, pills in a
+  // button-card template) are part of the card: they inherit its pointer
+  // cursor. They sink with it instead of staying popped up on a sunken card.
+  // Separate controls (their own cursor, or a nested ha-card) are left alone.
+  // Same tree scope only: nested components keep their own internals.
+  function raisedDecorations(surface) {
+    return [...surface.querySelectorAll('*')].filter((element) => {
+      if (element.localName === 'ha-card') return false;
+      const computedStyle = getComputedStyle(element);
+      if (computedStyle.boxShadow === 'none' || computedStyle.boxShadow.includes('inset') || !hasBox(computedStyle)) return false;
+      const parent = element.parentElement;
+      return parent && getComputedStyle(parent).cursor === 'pointer';
+    });
   }
 
   const DEEP_PRESS_MIN_SIZE = 80;

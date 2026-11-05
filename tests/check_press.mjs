@@ -15,6 +15,8 @@ class FakeElement {
     }, options);
     this.inlineStyles = new Map([['box-shadow', ['original-shadow', 'important']]]);
     this.attributes = new Set();
+    this.children = options.children ?? [];
+    for (const child of this.children) child.parentElement = this;
     this.style = {
       getPropertyValue: (property) => this.inlineStyles.get(property)?.[0] || '',
       getPropertyPriority: (property) => this.inlineStyles.get(property)?.[1] || '',
@@ -28,6 +30,7 @@ class FakeElement {
   getAttribute() { return null; }
   setAttribute(name) { this.attributes.add(name); }
   removeAttribute(name) { this.attributes.delete(name); }
+  querySelectorAll() { return this.children.flatMap((child) => [child, ...child.querySelectorAll()]); }
   getBoundingClientRect() { return { width: this.width, height: this.height }; }
 }
 
@@ -175,6 +178,23 @@ pressPath(new FakeElement({ cursor: 'pointer' }), sectionCard, new FakeElement()
 assert.match(boxShadow(sectionCard), /^inset/);
 fire('pointerup', sectionCard);
 
+// Raised decorations a card draws (icon rings) sink with the card; a separate
+// control inside it (own cursor, parent not pointer) does not.
+const ring = new FakeElement({ cursor: 'pointer', width: 48, height: 48, borderRadius: '50%', boxShadow: '3px 3px 6px #171d25' });
+const ringHolder = new FakeElement({ cursor: 'pointer', children: [ring] });
+const separateButton = new FakeElement({ cursor: 'pointer', width: 36, height: 36, boxShadow: '3px 3px 6px #171d25' });
+const quietWrapper = new FakeElement({ children: [separateButton] });
+const gridCard = new FakeElement({
+  tag: 'ha-card', cursor: 'pointer', width: 120, height: 132, boxShadow: '6px 6px 12px #171d25',
+  children: [ringHolder, quietWrapper],
+});
+pressPath(new FakeElement({ cursor: 'pointer' }), gridCard);
+assert.match(boxShadow(gridCard), /^inset 6px/);
+assert.match(boxShadow(ring), /^inset 3px/);
+assert.equal(boxShadow(separateButton), 'original-shadow');
+fire('pointerup', gridCard);
+assert.equal(boxShadow(ring), 'original-shadow');
+
 // Inline text link: clickable but must not get a card press.
 const inlineLink = new FakeElement({ cursor: 'pointer', display: 'inline' });
 fire('pointerdown', inlineLink); assert.equal(boxShadow(inlineLink), 'original-shadow');
@@ -197,4 +217,4 @@ for (const tag of ['mushroom-input-number']) {
 }
 assert.match(deepCss('mushroom-number-value-control'), /mushroom-slider \{[^}]*--soft-shadow-inset/);
 
-console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, decorative content ignored, nested raised buttons, deep inset on big cards, disabled ancestors (ha-sortable) ignored, ± rocker styles');
+console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, decorative content ignored, nested raised buttons, deep inset on big cards, disabled ancestors (ha-sortable) ignored, decorations sink with their card, ± rocker styles');
