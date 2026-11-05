@@ -167,6 +167,14 @@ assert.equal(boxShadow(lockButton), 'inset 3px 3px 6px #171d25');
 assert.equal(boxShadow(buttonCard), 'original-shadow');
 fire('pointerup', lockButton);
 
+// Sections dashboards: every card sits in an <ha-sortable> that is disabled
+// outside edit mode. A disabled ancestor must not block the card's press.
+const sortable = new FakeElement({ disabled: true });
+const sectionCard = new FakeElement({ tag: 'ha-card', cursor: 'pointer', width: 374, height: 132, boxShadow: '6px 6px 12px #171d25' });
+pressPath(new FakeElement({ cursor: 'pointer' }), sectionCard, new FakeElement(), sortable);
+assert.match(boxShadow(sectionCard), /^inset/);
+fire('pointerup', sectionCard);
+
 // Inline text link: clickable but must not get a card press.
 const inlineLink = new FakeElement({ cursor: 'pointer', display: 'inline' });
 fire('pointerdown', inlineLink); assert.equal(boxShadow(inlineLink), 'original-shadow');
@@ -189,4 +197,4 @@ for (const tag of ['mushroom-input-number']) {
 }
 assert.match(deepCss('mushroom-number-value-control'), /mushroom-slider \{[^}]*--soft-shadow-inset/);
 
-console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, decorative content ignored, nested raised buttons, deep inset on big cards, ± rocker styles');
+console.log('PASS: explicit + generic clickable surfaces, inline links skipped, keyboard scope, cancellation, blur, disabled, theme opt-in, exact style restoration, pressed marker, inherited-cursor icons skipped, raised card under tap layers/state items, opaque layers, rounded rows, inline-flex buttons, decorative content ignored, nested raised buttons, deep inset on big cards, disabled ancestors (ha-sortable) ignored, ± rocker styles');

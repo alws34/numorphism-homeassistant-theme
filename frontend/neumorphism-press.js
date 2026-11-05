@@ -91,10 +91,12 @@
     }
 
     const eventPath = event.composedPath().filter((node) => node instanceof Element);
-    if (eventPath.some(isDisabled)) return;
-
     const tapTarget = findPressableSurface(eventPath, event.type === 'pointerdown');
     if (!tapTarget) return;
+    // Only the control itself (and what was tapped inside it) can make the
+    // press disabled. Ancestors cannot: sections dashboards wrap every card in
+    // an <ha-sortable> whose `disabled` is true whenever you are not editing.
+    if (eventPath.slice(0, eventPath.indexOf(tapTarget) + 1).some(isDisabled)) return;
     if (!getComputedStyle(tapTarget).getPropertyValue('--soft-shadow-inset').trim()) return;
 
     releasePressedSurface();
