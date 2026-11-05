@@ -181,7 +181,9 @@ fire('pointerup', sectionCard);
 // Raised decorations a card draws (icon rings) sink with the card; a separate
 // control inside it (own cursor, parent not pointer) does not.
 const ring = new FakeElement({ cursor: 'pointer', width: 48, height: 48, borderRadius: '50%', boxShadow: '3px 3px 6px #171d25' });
-const ringHolder = new FakeElement({ cursor: 'pointer', children: [ring] });
+// A convex icon disc: outer drop shadow plus an inner highlight rim.
+const convexDisc = new FakeElement({ cursor: 'pointer', width: 42, height: 42, boxShadow: 'rgb(23, 29, 37) 2px 3px 6px 0px, rgb(53, 65, 80) 1px 1px 1px 0px inset' });
+const ringHolder = new FakeElement({ cursor: 'pointer', children: [ring, convexDisc] });
 const separateButton = new FakeElement({ cursor: 'pointer', width: 36, height: 36, boxShadow: '3px 3px 6px #171d25' });
 const quietWrapper = new FakeElement({ children: [separateButton] });
 const gridCard = new FakeElement({
@@ -191,6 +193,7 @@ const gridCard = new FakeElement({
 pressPath(new FakeElement({ cursor: 'pointer' }), gridCard);
 assert.match(boxShadow(gridCard), /^inset 6px/);
 assert.match(boxShadow(ring), /^inset 3px/);
+assert.match(boxShadow(convexDisc), /^inset 3px/);
 assert.equal(boxShadow(separateButton), 'original-shadow');
 fire('pointerup', gridCard);
 assert.equal(boxShadow(ring), 'original-shadow');

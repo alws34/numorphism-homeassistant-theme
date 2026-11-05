@@ -123,10 +123,16 @@
     return [...surface.querySelectorAll('*')].filter((element) => {
       if (element.localName === 'ha-card') return false;
       const computedStyle = getComputedStyle(element);
-      if (computedStyle.boxShadow === 'none' || computedStyle.boxShadow.includes('inset') || !hasBox(computedStyle)) return false;
+      if (!isRaised(computedStyle.boxShadow) || !hasBox(computedStyle)) return false;
       const parent = element.parentElement;
       return parent && getComputedStyle(parent).cursor === 'pointer';
     });
+  }
+
+  // Raised = at least one outer shadow layer; a convex shape may add an inner
+  // highlight rim (an inset layer) and is still raised.
+  function isRaised(boxShadow) {
+    return boxShadow !== 'none' && boxShadow.split(/,(?![^(]*\))/).some((layer) => !layer.includes('inset'));
   }
 
   const DEEP_PRESS_MIN_SIZE = 80;
