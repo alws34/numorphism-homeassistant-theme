@@ -14,10 +14,17 @@ class UniqueLoader(yaml.SafeLoader):
 
 
 def mapping(loader, node):
-    result = {}
-    for key_node, value_node in node.value:
+    # `<<: *anchor` merges are allowed (the colour variants reuse Neumorphism);
+    # an explicit key may override a merged one, but never repeat another explicit key.
+    explicit = len([k for k, _ in node.value if k.tag != "tag:yaml.org,2002:merge"])
+    loader.flatten_mapping(node)
+    first_explicit = len(node.value) - explicit
+    result, seen = {}, set()
+    for index, (key_node, value_node) in enumerate(node.value):
         key = loader.construct_object(key_node)
-        assert key not in result, f"Duplicate key {key!r}, line {key_node.start_mark.line + 1}"
+        if index >= first_explicit:
+            assert key not in seen, f"Duplicate key {key!r}, line {key_node.start_mark.line + 1}"
+            seen.add(key)
         result[key] = loader.construct_object(value_node)
     return result
 
@@ -62,38 +69,46 @@ def check_styles(value):
 files = list((ROOT / "themes").glob("*.yaml"))
 assert len(files) == 1, "HACS must manage one theme file"
 themes = load(files[0].read_text())
-assert list(themes) == ["Neumorphism"]
-theme = themes["Neumorphism"]
-assert theme["card-mod-theme"] == "Neumorphism"
-assert not any(key.endswith("-yaml") for key in theme), "Avoid the broken card-mod 4.2.1 YAML bootstrap"
-assert set(theme["modes"]) == {"light", "dark"}
-assert set(theme["modes"]["light"]) == set(theme["modes"]["dark"])
+assert list(themes)[0] == "Neumorphism"
+assert all(name == "Neumorphism" or name.startswith("Neumorphism ") for name in themes)
 assert json.loads((ROOT / "hacs.json").read_text())["name"] == "Neumorphism"
+base = themes["Neumorphism"]
+palette_keys = set(base["modes"]["light"])
 
-for mode, palette in theme["modes"].items():
-    merged = {k: v for k, v in theme.items() if k != "modes"} | palette
-    assert all(isinstance(v, str) for v in merged.values()), "Theme values must be strings"
-    # Resolve the entire variable graph so undefined private tokens and cycles fail.
-    def resolve(key, trail=()):
-        assert key not in trail, f"Variable cycle: {trail + (key,)}"
-        def replace(match):
-            target = match[1]
-            assert not target.startswith("soft-") or target in merged, target
-            return resolve(target, trail + (key,)) if target in merged else match[0]
-        return re.sub(r"var\(--([\w-]+)\)", replace, merged[key])
-    for key in merged:
-        resolve(key)
-    ratios = []
-    for text in ("primary-text-color", "secondary-text-color", "primary-color", "error-color", "warning-color", "success-color", "info-color"):
-        for background in ("soft-surface", "soft-recess"):
-            ratio = contrast(palette[text], palette[background])
-            assert ratio >= 4.5, (mode, text, background, ratio)
-            ratios.append(ratio)
-    assert contrast(palette["text-primary-color"], palette["primary-color"]) >= 4.5
-    for text in ("primary-text-color", "secondary-text-color"):
-        assert contrast(palette[text], palette["soft-active-surface"]) >= 4.5
-    assert contrast(palette["soft-control-edge"], palette["soft-surface"]) >= 3
-    print(f"{mode}: text/status contrast >= {min(ratios):.2f}:1; on-accent and control edges pass")
+for name, theme in themes.items():
+    print(f"[{name}]")
+    assert theme["card-mod-theme"] == name, f"{name}: card-mod-theme must repeat the theme name"
+    assert not any(key.endswith("-yaml") for key in theme), "Avoid the broken card-mod 4.2.1 YAML bootstrap"
+    # Variants change only the palette; material and card-mod rules stay shared.
+    assert {k: v for k, v in theme.items() if k not in ("modes", "card-mod-theme")} == \
+        {k: v for k, v in base.items() if k not in ("modes", "card-mod-theme")}, name
+    assert set(theme["modes"]) == {"light", "dark"}
+    assert set(theme["modes"]["light"]) == set(theme["modes"]["dark"]) == palette_keys, name
+  
+    for mode, palette in theme["modes"].items():
+        merged = {k: v for k, v in theme.items() if k != "modes"} | palette
+        assert all(isinstance(v, str) for v in merged.values()), "Theme values must be strings"
+        # Resolve the entire variable graph so undefined private tokens and cycles fail.
+        def resolve(key, trail=()):
+            assert key not in trail, f"Variable cycle: {trail + (key,)}"
+            def replace(match):
+                target = match[1]
+                assert not target.startswith("soft-") or target in merged, target
+                return resolve(target, trail + (key,)) if target in merged else match[0]
+            return re.sub(r"var\(--([\w-]+)\)", replace, merged[key])
+        for key in merged:
+            resolve(key)
+        ratios = []
+        for text in ("primary-text-color", "secondary-text-color", "primary-color", "error-color", "warning-color", "success-color", "info-color"):
+            for background in ("soft-surface", "soft-recess"):
+                ratio = contrast(palette[text], palette[background])
+                assert ratio >= 4.5, (mode, text, background, ratio)
+                ratios.append(ratio)
+        assert contrast(palette["text-primary-color"], palette["primary-color"]) >= 4.5
+        for text in ("primary-text-color", "secondary-text-color"):
+            assert contrast(palette[text], palette["soft-active-surface"]) >= 4.5
+        assert contrast(palette["soft-control-edge"], palette["soft-surface"]) >= 3
+        print(f"{mode}: text/status contrast >= {min(ratios):.2f}:1; on-accent and control edges pass")
 
 for key, value in theme.items():
     if key.startswith("card-mod-") and key != "card-mod-theme":
