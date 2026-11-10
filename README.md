@@ -18,12 +18,16 @@ Runtime: one YAML theme plus **card-mod**, with a small press-feedback module fo
        - /local/neumorphism-press.js?v=10
    ```
 
-   **No file access?** Instead of copying the press module, add it under **Settings → Dashboards → ⋮ → Resources** as a JavaScript module with the URL `https://cdn.jsdelivr.net/gh/alws34/numorphism-homeassistant-theme@v1.0.15/frontend/neumorphism-press.js`, changing the tag when you update. It then loads with your dashboards (not on other HA pages).
+   **No file access?** Instead of copying the press module, add it under **Settings → Dashboards → ⋮ → Resources** as a JavaScript module with the URL `https://cdn.jsdelivr.net/gh/alws34/numorphism-homeassistant-theme@v1.1.0/frontend/neumorphism-press.js`, changing the tag when you update. It then loads with your dashboards (not on other HA pages).
 
    **Use your actual card-mod resource URL.** Find it under **Settings → Dashboards → ⋮ → Resources**. If its URL has a `?hacstag=...` suffix, copy that exact URL into `extra_module_url` too. Retain the HACS-managed resource entry and keep both URLs identical after updates. See [card-mod installation](https://github.com/thomasloven/lovelace-card-mod#installation).
 
 4. Check your HA configuration, then restart Home Assistant once for the `frontend` change. For subsequent theme-only edits, run **Developer tools → Actions → `frontend.reload_themes`**, then refresh the browser if necessary.
 5. Open your **Profile → General → Theme**, select **Neumorphism**, then set **Theme mode → Auto**. Home Assistant selects the light or dark palette from the device appearance. These are native [frontend theme modes](https://www.home-assistant.io/integrations/frontend/#dark-mode-support).
+
+### Colour variants
+
+The same file also installs five colour variants: **Neumorphism Peach**, **Neumorphism Sage**, **Neumorphism Rose**, **Neumorphism Sand** and **Neumorphism Graphite**. They reuse the base theme's material and card-mod rules through a YAML merge (`<<: *neumorphism`) and only replace the palette under `modes:`, so each still follows **Auto / Light / Dark**. Pick one in your profile or with `theme:` on a view. Use the variant's exact name in `theme:` and keep its `card-mod-theme` line unchanged.
 
 ## Test without controlling real devices
 
